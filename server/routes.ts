@@ -402,8 +402,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Импортируем функцию синхронизации
       const { syncProductsWithGoogleSheets } = await import('./google-sheets');
       
+      // Получаем настройки
+      const settings = await storage.getSettings();
+      if (!settings || !settings.googleSheetsUrl || !settings.googleApiKey) {
+        return res.status(400).json({
+          message: "Для синхронизации необходимо указать URL Google таблицы и API-ключ в настройках",
+          success: false
+        });
+      }
+      
       // Синхронизируем данные с Google Sheets
       await syncProductsWithGoogleSheets();
+      
+      // Обновляем время последней синхронизации
+      await storage.updateSettings({
+        lastSyncTime: new Date().toISOString()
+      });
       
       res.json({ 
         message: "Синхронизация с Google Sheets успешно выполнена",
@@ -415,6 +429,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: error.message || "Ошибка при синхронизации с Google Sheets",
         success: false
       });
+    }
+  });
+  
+  // Inventory API
+  app.get("/api/inventory/product/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      if (isNaN(productId)) {
+        return res.status(400).json({ message: "ID товара должен быть числом" });
+      }
+      
+      const inventoryItems = await storage.getProductInventoryByProduct(productId);
+      res.json(inventoryItems);
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка при получении данных о наличии товара" });
+    }
+  });
+  
+  app.get("/api/inventory/store/:storeId", async (req, res) => {
+    try {
+      const storeId = parseInt(req.params.storeId);
+      if (isNaN(storeId)) {
+        return res.status(400).json({ message: "ID магазина должен быть числом" });
+      }
+      
+      const inventoryItems = await storage.getProductInventoryByStore(storeId);
+      res.json(inventoryItems);
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка при получении данных о наличии товаров в магазине" });
+    }
+  });
+  
+  app.post("/api/inventory/update", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Необходима авторизация" });
+    }
+    
+    try {
+      const { productId, storeId, quantity } = req.body;
+      
+      if (typeof productId !== 'number' || typeof storeId !== 'number' || typeof quantity !== 'number') {
+        return res.status(400).json({ 
+          message: "Неверные данные. productId, storeId и quantity должны быть числами" 
+        });
+      }
+      
+      const inventory = await storage.updateProductInventory(productId, storeId, quantity);
+      
+      if (!inventory) {
+        return res.status(404).json({ message: "Не удалось обновить данные о наличии товара" });
+      }
+      
+      res.json(inventory);
+    } catch (error) {
+      res.status(500).json({ message: "Ошибка при обновлении данных о наличии товара" });
     }
   });
   

@@ -362,6 +362,24 @@ export default function SettingsPage() {
                           )}
                         />
                         
+                        {settings?.lastSyncTime && (
+                          <div className="flex items-center mt-2 text-sm text-gray-400">
+                            <RefreshCw className="h-4 w-4 mr-2" />
+                            Последняя синхронизация: {new Date(settings.lastSyncTime).toLocaleString()}
+                          </div>
+                        )}
+                        
+                        <div className="flex flex-col space-y-2">
+                          <p className="text-sm text-amber-400">
+                            <strong>Формат таблицы Google Sheets:</strong>
+                          </p>
+                          <ul className="text-xs text-gray-400 list-disc pl-5">
+                            <li>В ячейке A1: "SKU", B1: "Количество", C1: "Гагарина", D1: "Победа"</li>
+                            <li>Для каждого товара: артикул в колонке A, общее количество в B, количество в магазине на Гагарина в C, и на Победе в D</li>
+                            <li>Обязательно откройте доступ к таблице по ссылке (для просмотра)</li>
+                          </ul>
+                        </div>
+                        
                         <div className="flex items-center space-x-4 pt-4">
                           <Button
                             type="button"

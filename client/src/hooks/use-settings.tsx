@@ -33,7 +33,11 @@ export function useSyncGoogleSheets() {
       return await res.json();
     },
     onSuccess: () => {
+      // Обновляем как товары, так и настройки (для получения времени последней синхронизации)
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/settings'] });
+      // Также обновляем данные инвентаря
+      queryClient.invalidateQueries({ queryKey: ['/api/inventory'] });
     },
   });
 }
