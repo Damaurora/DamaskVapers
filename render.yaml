@@ -4,7 +4,7 @@ services:
     name: damask-shop
     plan: free
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --production=false && npm run build
     startCommand: NODE_ENV=production tsx server/index.ts
     envVars:
       - key: NODE_ENV
