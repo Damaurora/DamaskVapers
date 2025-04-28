@@ -7,8 +7,8 @@ import fs from "fs";
  * Используется только в production режиме
  */
 export function setupStaticServing(app: Express) {
-  // В production режиме после сборки файлы клиента будут находиться в dist/client
-  const clientDistPath = path.resolve(process.cwd(), "client/dist");
+  // В production режиме после сборки файлы клиента будут находиться в dist/static
+  const clientDistPath = path.resolve(process.cwd(), "dist/static");
   
   // Проверка существования директории
   if (!fs.existsSync(clientDistPath)) {
