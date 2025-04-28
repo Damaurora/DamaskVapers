@@ -1,66 +1,77 @@
-import { useState } from "react";
-import { Link } from "wouter";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
-  CardFooter 
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { LogoIcon } from "@/components/icons";
+import { useState, useEffect } from "react";
+import { useLocation, Link } from "wouter";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Settings as SettingsIcon, BarChart2, Package, UploadCloud, Download, Loader2, ArrowLeft, RefreshCw } from "lucide-react";
+import { useSyncGoogleSheets, useSettings, useUpdateSettings } from "@/hooks/use-settings";
 import { useAuth } from "@/hooks/use-auth";
-import { BarChart2, Package, Settings as SettingsIcon, Loader2, Upload, Link as LinkIcon, RefreshCw } from "lucide-react";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { useSettings, useUpdateSettings, useSyncGoogleSheets } from "@/hooks/use-settings";
 import { useToast } from "@/hooks/use-toast";
+import { LogoIcon } from "@/components/icons";
 
-export default function Settings() {
+// Схема валидации формы
+const formSchema = z.object({
+  shopName: z.string().min(1, "Название магазина обязательно"),
+  shopDescription: z.string().optional(),
+  logoUrl: z.string().optional(),
+  googleSheetsUrl: z.string().optional(),
+  googleApiKey: z.string().optional(),
+});
+
+export default function SettingsPage() {
   const { user, logoutMutation } = useAuth();
-  const { settings, isLoading } = useSettings();
-  const updateSettingsMutation = useUpdateSettings();
-  const syncGoogleSheetsMutation = useSyncGoogleSheets();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { data: settings, isLoading } = useSettings();
+  const updateSettings = useUpdateSettings();
+  const syncGoogleSheets = useSyncGoogleSheets();
+  const [isSyncing, setIsSyncing] = useState(false);
   
-  const [logoUrl, setLogoUrl] = useState(settings?.logo || "");
-  const [shopName, setShopName] = useState(settings?.shopName || "Damask Shop");
-  const [googleSheetUrl, setGoogleSheetUrl] = useState(settings?.googleSheetUrl || "");
-  const [syncFrequency, setSyncFrequency] = useState(settings?.syncFrequency || "manual");
-  const [logoUploadMethod, setLogoUploadMethod] = useState<"url" | "file">("url");
-  const [logoFile, setLogoFile] = useState<File | null>(null);
+  // Инициализация формы
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      shopName: "",
+      shopDescription: "",
+      logoUrl: "",
+      googleSheetsUrl: "",
+      googleApiKey: "",
+    },
+  });
   
-  // Update state when settings are loaded
+  // Обновление формы при загрузке данных
   useState(() => {
     if (settings) {
-      setLogoUrl(settings.logo || "");
-      setShopName(settings.shopName || "Damask Shop");
-      setGoogleSheetUrl(settings.googleSheetUrl || "");
-      setSyncFrequency(settings.syncFrequency || "manual");
+      form.reset({
+        shopName: settings.shopName || "",
+        shopDescription: settings.description || "",
+        logoUrl: settings.logo || "",
+        googleSheetsUrl: settings.googleSheetsUrl || "",
+        googleApiKey: settings.googleApiKey || "",
+      });
     }
   });
   
-  // Handle saving site settings
-  const handleSaveSiteSettings = async () => {
+  // Обработка отправки формы
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await updateSettingsMutation.mutateAsync({
-        shopName,
-        logo: logoUrl
+      await updateSettings.mutateAsync({
+        shopName: values.shopName,
+        description: values.shopDescription,
+        logo: values.logoUrl,
+        googleSheetsUrl: values.googleSheetsUrl,
+        googleApiKey: values.googleApiKey,
       });
       
       toast({
         title: "Настройки сохранены",
-        description: "Настройки сайта успешно обновлены",
+        description: "Изменения успешно применены",
       });
     } catch (error) {
       toast({
@@ -71,58 +82,41 @@ export default function Settings() {
     }
   };
   
-  // Handle saving Google Sheets settings
-  const handleSaveGoogleSettings = async () => {
-    try {
-      await updateSettingsMutation.mutateAsync({
-        googleSheetUrl,
-        syncFrequency
-      });
-      
+  // Обработка синхронизации с Google Таблицами
+  const handleSyncGoogleSheets = async () => {
+    if (!form.getValues().googleSheetsUrl || !form.getValues().googleApiKey) {
       toast({
-        title: "Настройки сохранены",
-        description: "Настройки синхронизации успешно обновлены",
+        title: "Ошибка синхронизации",
+        description: "Укажите URL таблицы и API ключ Google",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsSyncing(true);
+    try {
+      await syncGoogleSheets.mutateAsync();
+      toast({
+        title: "Синхронизация завершена",
+        description: "Данные успешно обновлены из Google Таблиц",
       });
     } catch (error) {
       toast({
-        title: "Ошибка",
-        description: "Не удалось сохранить настройки",
+        title: "Ошибка синхронизации",
+        description: "Не удалось получить данные из Google Таблиц",
         variant: "destructive",
       });
+    } finally {
+      setIsSyncing(false);
     }
   };
   
-  // Handle logo file selection
-  const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setLogoFile(e.target.files[0]);
-      setLogoUrl(URL.createObjectURL(e.target.files[0]));
-    }
-  };
-  
-  // Handle manual sync with Google Sheets
-  const handleManualSync = async () => {
-    try {
-      await syncGoogleSheetsMutation.mutateAsync();
-      
-      toast({
-        title: "Синхронизация запущена",
-        description: "Синхронизация с Google Таблицами запущена успешно",
-      });
-    } catch (error) {
-      toast({
-        title: "Ошибка",
-        description: "Не удалось запустить синхронизацию",
-        variant: "destructive",
-      });
-    }
-  };
-  
-  // Handle logout
+  // Обработка выхода из системы
   const handleLogout = () => {
     logoutMutation.mutate();
   };
   
+  // Отображение загрузки
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-secondary">
@@ -130,11 +124,11 @@ export default function Settings() {
       </div>
     );
   }
-
+  
   return (
     <div className="min-h-screen bg-secondary">
       <div className="flex">
-        {/* Sidebar */}
+        {/* Боковая панель */}
         <div className="hidden md:flex h-screen w-64 flex-col bg-[#1E1E1E] border-r border-gray-800 fixed">
           <div className="p-4 flex items-center border-b border-gray-800">
             <LogoIcon className="w-8 h-8 mr-2" />
@@ -146,22 +140,22 @@ export default function Settings() {
           <nav className="flex-1 p-4">
             <div className="space-y-1">
               <Link href="/admin">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer">
                   <BarChart2 className="mr-3 h-5 w-5" />
                   Обзор
-                </a>
+                </div>
               </Link>
               <Link href="/admin/products">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer">
                   <Package className="mr-3 h-5 w-5" />
                   Товары
-                </a>
+                </div>
               </Link>
               <Link href="/admin/settings">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white cursor-pointer">
                   <SettingsIcon className="mr-3 h-5 w-5" />
                   Настройки
-                </a>
+                </div>
               </Link>
             </div>
           </nav>
@@ -190,7 +184,7 @@ export default function Settings() {
           </div>
         </div>
         
-        {/* Mobile header */}
+        {/* Мобильный хедер */}
         <div className="md:hidden bg-[#1E1E1E] border-b border-gray-800 w-full fixed top-0 z-10">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
@@ -215,265 +209,253 @@ export default function Settings() {
               </Button>
             </div>
           </div>
-          
-          <div className="flex space-x-2 p-2 bg-[#1E1E1E] overflow-x-auto">
-            <Link href="/admin">
-              <Button variant="ghost" size="sm" className="whitespace-nowrap">
-                <BarChart2 className="w-4 h-4 mr-2" />
-                Обзор
-              </Button>
-            </Link>
-            <Link href="/admin/products">
-              <Button variant="ghost" size="sm" className="whitespace-nowrap">
-                <Package className="w-4 h-4 mr-2" />
-                Товары
-              </Button>
-            </Link>
-            <Link href="/admin/settings">
-              <Button variant="default" size="sm" className="whitespace-nowrap bg-primary">
-                <SettingsIcon className="w-4 h-4 mr-2" />
-                Настройки
-              </Button>
-            </Link>
-          </div>
         </div>
         
-        {/* Main content */}
+        {/* Основное содержимое */}
         <div className="flex-1 md:ml-64">
-          <div className="container mx-auto px-4 py-8 md:py-6 mt-[126px] md:mt-0">
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold font-montserrat">Настройки</h1>
-              <p className="text-gray-400">Управление настройками сайта и синхронизацией</p>
+          <div className="container mx-auto px-4 py-8 md:py-6 mt-[61px] md:mt-0">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold font-montserrat">Настройки</h1>
+                <p className="text-gray-400">Управление настройками магазина</p>
+              </div>
+              
+              <Button 
+                onClick={form.handleSubmit(onSubmit)}
+                className="bg-primary hover:bg-primary/90 text-white"
+                disabled={updateSettings.isPending}
+              >
+                {updateSettings.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Сохранение...
+                  </>
+                ) : (
+                  <>Сохранить настройки</>
+                )}
+              </Button>
             </div>
             
-            <Tabs defaultValue="site" className="space-y-6">
-              <TabsList className="bg-[#1E1E1E]">
-                <TabsTrigger value="site">Настройки сайта</TabsTrigger>
-                <TabsTrigger value="sync">Синхронизация</TabsTrigger>
-              </TabsList>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Основная форма настроек */}
+              <div className="lg:col-span-2 space-y-6">
+                <Form {...form}>
+                  <form>
+                    <Card className="bg-[#1E1E1E] border-gray-800 text-white">
+                      <CardHeader>
+                        <CardTitle>Основные настройки</CardTitle>
+                        <CardDescription className="text-gray-400">
+                          Настройки отображения сайта
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <FormField
+                          control={form.control}
+                          name="shopName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Название магазина</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field} 
+                                  placeholder="Введите название магазина" 
+                                  className="bg-secondary border-gray-700 text-white"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="shopDescription"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Описание магазина</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  {...field} 
+                                  placeholder="Добавьте краткое описание магазина" 
+                                  className="bg-secondary border-gray-700 text-white h-20 resize-none"
+                                />
+                              </FormControl>
+                              <FormDescription className="text-gray-500">
+                                Будет отображаться в подвале сайта и мета-тегах
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="logoUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Логотип</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field} 
+                                  placeholder="Укажите URL логотипа" 
+                                  className="bg-secondary border-gray-700 text-white"
+                                />
+                              </FormControl>
+                              <FormDescription className="text-gray-500">
+                                Укажите относительный путь от корня сайта, например: /logo.svg
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-[#1E1E1E] border-gray-800 text-white mt-6">
+                      <CardHeader>
+                        <CardTitle>Интеграция с Google Таблицами</CardTitle>
+                        <CardDescription className="text-gray-400">
+                          Настройка синхронизации товаров с Google Таблицами
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <FormField
+                          control={form.control}
+                          name="googleSheetsUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>URL Google Таблицы</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field} 
+                                  placeholder="https://docs.google.com/spreadsheets/d/ВАШ_ID_ТАБЛИЦЫ/edit" 
+                                  className="bg-secondary border-gray-700 text-white"
+                                />
+                              </FormControl>
+                              <FormDescription className="text-gray-500">
+                                Укажите полный URL таблицы для синхронизации
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="googleApiKey"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>API ключ Google</FormLabel>
+                              <FormControl>
+                                <Input 
+                                  {...field} 
+                                  type="password"
+                                  placeholder="Введите ваш API ключ Google" 
+                                  className="bg-secondary border-gray-700 text-white"
+                                />
+                              </FormControl>
+                              <FormDescription className="text-gray-500">
+                                Ключ с доступом к Google Sheets API
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <div className="flex items-center space-x-4 pt-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-gray-700 text-white"
+                            onClick={handleSyncGoogleSheets}
+                            disabled={isSyncing}
+                          >
+                            {isSyncing ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Синхронизация...
+                              </>
+                            ) : (
+                              <>
+                                <RefreshCw className="mr-2 h-4 w-4" />
+                                Синхронизировать сейчас
+                              </>
+                            )}
+                          </Button>
+                          
+                          <a 
+                            href="/client/src/assets/google-sheets-template.csv" 
+                            download="google-sheets-template.csv"
+                            className="inline-flex items-center px-4 py-2 border border-gray-700 text-sm font-medium rounded-md text-white hover:bg-gray-800"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <Download className="mr-2 h-4 w-4" />
+                            Скачать шаблон таблицы
+                          </a>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </form>
+                </Form>
+              </div>
               
-              <TabsContent value="site">
+              {/* Боковые карточки с инструкциями */}
+              <div className="space-y-6">
                 <Card className="bg-[#1E1E1E] border-gray-800 text-white">
                   <CardHeader>
-                    <CardTitle>Настройки сайта</CardTitle>
+                    <CardTitle>Инструкция по синхронизации</CardTitle>
                     <CardDescription className="text-gray-400">
-                      Управление основными параметрами отображения сайта
+                      Как настроить Google Таблицы
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <Label htmlFor="shop-name" className="mb-2 block">Название магазина</Label>
-                      <Input 
-                        id="shop-name" 
-                        value={shopName} 
-                        onChange={(e) => setShopName(e.target.value)} 
-                        className="bg-secondary border-gray-700 text-white"
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Название магазина будет отображаться в заголовке и футере
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <Label className="mb-2 block">Логотип</Label>
+                  <CardContent>
+                    <div className="space-y-4 text-sm">
+                      <div>
+                        <h3 className="font-medium text-white">1. Создайте Google Таблицу</h3>
+                        <p className="text-gray-400 mt-1">Создайте новую таблицу или используйте скачанный шаблон</p>
+                      </div>
                       
-                      <Tabs defaultValue={logoUploadMethod} onValueChange={(v) => setLogoUploadMethod(v as "url" | "file")}>
-                        <TabsList className="grid grid-cols-2 bg-secondary">
-                          <TabsTrigger value="url">URL ссылка</TabsTrigger>
-                          <TabsTrigger value="file">Загрузка файла</TabsTrigger>
-                        </TabsList>
-                        
-                        <TabsContent value="url" className="mt-4">
-                          <div className="flex items-center">
-                            <Input 
-                              type="text" 
-                              placeholder="Введите URL логотипа" 
-                              value={logoUrl} 
-                              onChange={(e) => setLogoUrl(e.target.value)}
-                              className="bg-secondary border-gray-700 text-white flex-1 mr-2"
-                            />
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              className="border-gray-700 text-white"
-                              onClick={() => {
-                                if (logoUrl) {
-                                  window.open(logoUrl, '_blank');
-                                }
-                              }}
-                              disabled={!logoUrl}
-                            >
-                              <LinkIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Введите прямую ссылку на изображение логотипа
-                          </p>
-                        </TabsContent>
-                        
-                        <TabsContent value="file" className="mt-4">
-                          <div className="border-2 border-dashed border-gray-700 rounded-lg p-6 text-center">
-                            <Upload className="h-8 w-8 mx-auto text-gray-400 mb-2" />
-                            <p className="text-sm text-gray-400 mb-2">
-                              Перетащите файл сюда или нажмите для выбора
-                            </p>
-                            <Input 
-                              type="file" 
-                              accept="image/*" 
-                              className="hidden" 
-                              id="logo-upload"
-                              onChange={handleLogoFileChange}
-                            />
-                            <label htmlFor="logo-upload">
-                              <Button 
-                                variant="outline" 
-                                className="border-gray-700 text-white"
-                                onClick={(e) => e.preventDefault()}
-                              >
-                                Выбрать файл
-                              </Button>
-                            </label>
-                          </div>
-                          {logoFile && (
-                            <p className="text-sm text-gray-400 mt-2">
-                              Выбран файл: {logoFile.name}
-                            </p>
-                          )}
-                        </TabsContent>
-                      </Tabs>
+                      <div>
+                        <h3 className="font-medium text-white">2. Настройте структуру</h3>
+                        <p className="text-gray-400 mt-1">
+                          Таблица должна содержать следующие столбцы:
+                          <ul className="list-disc pl-5 mt-1 space-y-1">
+                            <li>SKU - уникальный код товара</li>
+                            <li>Name - название товара (опционально)</li>
+                            <li>Status - статус наличия (in_stock, out_of_stock, coming_soon)</li>
+                          </ul>
+                        </p>
+                      </div>
                       
-                      <div className="mt-4">
-                        <Label className="mb-2 block">Предпросмотр</Label>
-                        <div className="flex items-center mt-2 bg-secondary p-3 rounded-lg">
-                          {logoUrl ? (
-                            <div className="w-10 h-10 mr-3">
-                              <img 
-                                src={logoUrl} 
-                                alt="Логотип" 
-                                className="w-full h-full object-contain"
-                                onError={(e) => {
-                                  e.currentTarget.src = "https://via.placeholder.com/40?text=Ошибка";
-                                }}
-                              />
-                            </div>
-                          ) : (
-                            <LogoIcon className="w-10 h-10 mr-3" />
-                          )}
-                          <h1 className="text-2xl font-bold font-montserrat text-white">
-                            <span className="text-primary neon-effect">{shopName.split(' ')[0] || 'Damask'}</span> {shopName.split(' ')[1] || 'Shop'}
-                          </h1>
-                        </div>
+                      <div>
+                        <h3 className="font-medium text-white">3. Получите API ключ</h3>
+                        <p className="text-gray-400 mt-1">
+                          Создайте ключ API в <a href="https://console.cloud.google.com/" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>
+                        </p>
+                      </div>
+                      
+                      <div>
+                        <h3 className="font-medium text-white">4. Настройте доступ</h3>
+                        <p className="text-gray-400 mt-1">Откройте доступ к таблице для всех, у кого есть ссылка (режим "Просмотр")</p>
                       </div>
                     </div>
                   </CardContent>
-                  <CardFooter className="border-t border-gray-800 pt-6">
-                    <Button 
-                      className="bg-primary hover:bg-primary/90 text-white ml-auto"
-                      onClick={handleSaveSiteSettings}
-                      disabled={updateSettingsMutation.isPending}
-                    >
-                      {updateSettingsMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Сохранение...
-                        </>
-                      ) : (
-                        <>Сохранить настройки</>
-                      )}
-                    </Button>
-                  </CardFooter>
                 </Card>
-              </TabsContent>
-              
-              <TabsContent value="sync">
-                <Card className="bg-[#1E1E1E] border-gray-800 text-white">
+                
+                <Card className="bg-gradient-to-br from-gray-800 to-[#1E1E1E] border-gray-800 text-white">
                   <CardHeader>
-                    <CardTitle>Синхронизация с Google Таблицами</CardTitle>
-                    <CardDescription className="text-gray-400">
-                      Настройка автоматической синхронизации товаров через Google Таблицы
-                    </CardDescription>
+                    <CardTitle>Помощь</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <Label htmlFor="google-sheet-url" className="mb-2 block">URL Google Таблицы</Label>
-                      <Input 
-                        id="google-sheet-url" 
-                        value={googleSheetUrl} 
-                        onChange={(e) => setGoogleSheetUrl(e.target.value)} 
-                        placeholder="https://docs.google.com/spreadsheets/d/..."
-                        className="bg-secondary border-gray-700 text-white"
-                      />
-                      <p className="text-sm text-gray-500 mt-1">
-                        Введите URL таблицы с данными о товарах
-                      </p>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="sync-frequency" className="mb-2 block">Частота синхронизации</Label>
-                      <Select
-                        value={syncFrequency}
-                        onValueChange={setSyncFrequency}
-                      >
-                        <SelectTrigger id="sync-frequency" className="bg-secondary border-gray-700 text-white">
-                          <SelectValue placeholder="Выберите частоту" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#1E1E1E] border-gray-700 text-white">
-                          <SelectItem value="manual" className="focus:bg-gray-800 focus:text-white">Вручную</SelectItem>
-                          <SelectItem value="hourly" className="focus:bg-gray-800 focus:text-white">Каждый час</SelectItem>
-                          <SelectItem value="daily" className="focus:bg-gray-800 focus:text-white">Раз в день</SelectItem>
-                          <SelectItem value="weekly" className="focus:bg-gray-800 focus:text-white">Раз в неделю</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Выберите, как часто данные будут обновляться автоматически
-                      </p>
-                    </div>
-                    
-                    <Separator className="bg-gray-800" />
-                    
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Запуск синхронизации</h3>
-                      <p className="text-sm text-gray-400 mb-4">
-                        Вы можете запустить синхронизацию вручную в любой момент
-                      </p>
-                      <Button 
-                        onClick={handleManualSync}
-                        disabled={syncGoogleSheetsMutation.isPending || !googleSheetUrl}
-                        className="bg-secondary border border-gray-700 hover:bg-gray-800 text-white"
-                      >
-                        {syncGoogleSheetsMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Синхронизация...
-                          </>
-                        ) : (
-                          <>
-                            <RefreshCw className="mr-2 h-4 w-4" />
-                            Запустить синхронизацию
-                          </>
-                        )}
-                      </Button>
-                    </div>
+                  <CardContent>
+                    <p className="text-gray-300 text-sm">
+                      Если у вас возникли вопросы по настройке интеграции или работе с панелью администратора, свяжитесь с нами:
+                    </p>
+                    <p className="mt-2 text-primary">support@damaskshop.ru</p>
                   </CardContent>
-                  <CardFooter className="border-t border-gray-800 pt-6">
-                    <Button 
-                      className="bg-primary hover:bg-primary/90 text-white ml-auto"
-                      onClick={handleSaveGoogleSettings}
-                      disabled={updateSettingsMutation.isPending}
-                    >
-                      {updateSettingsMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Сохранение...
-                        </>
-                      ) : (
-                        <>Сохранить настройки</>
-                      )}
-                    </Button>
-                  </CardFooter>
                 </Card>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
           </div>
         </div>
       </div>

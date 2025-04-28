@@ -79,14 +79,18 @@ export const settings = pgTable("settings", {
   id: serial("id").primaryKey(),
   logo: text("logo"),
   shopName: text("shop_name").notNull(),
-  googleSheetUrl: text("google_sheet_url"),
+  description: text("description"),
+  googleSheetsUrl: text("google_sheets_url"),
+  googleApiKey: text("google_api_key"),
   syncFrequency: text("sync_frequency").default("manual"),
 });
 
 export const insertSettingsSchema = createInsertSchema(settings).pick({
   logo: true,
   shopName: true,
-  googleSheetUrl: true,
+  description: true,
+  googleSheetsUrl: true,
+  googleApiKey: true,
   syncFrequency: true,
 });
 
