@@ -13,6 +13,7 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
   
   const placeholderImage = "https://images.unsplash.com/photo-1560373719-cc5a72e018d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=250&q=80";
   
+  // Получаем текст статуса наличия товара с учетом точного количества
   const getStatusText = (status: string) => {
     switch(status) {
       case ProductStatus.IN_STOCK:
@@ -26,9 +27,18 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
     }
   };
   
+  // Определяем дополнительный класс для бейджа статуса в зависимости от количества
+  const getStockClass = () => {
+    if (status === ProductStatus.IN_STOCK && quantity) {
+      if (quantity <= 3) return 'low-stock'; // Мало товаров
+      if (quantity > 10) return 'high-stock'; // Много товаров
+    }
+    return '';
+  };
+  
   return (
     <div className={`product-card bg-[#1E1E1E] rounded-lg overflow-hidden relative ${featured ? 'flex-shrink-0 w-64' : ''}`}>
-      <StatusBadge status={status} className="status-badge z-10">
+      <StatusBadge status={status} quantity={quantity} className="status-badge z-10">
         {getStatusText(status)}
       </StatusBadge>
       

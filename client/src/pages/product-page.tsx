@@ -86,7 +86,7 @@ export default function ProductPage() {
         <div className="bg-[#1E1E1E] rounded-lg overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
             <div className="relative">
-              <StatusBadge status={product.status} className="status-badge z-10">
+              <StatusBadge status={product.status} quantity={product.quantity} className="status-badge z-10">
                 {getStatusText(product.status)}
               </StatusBadge>
               <img 

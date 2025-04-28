@@ -104,6 +104,39 @@ body {
   }
   
   .status-badge {
-    @apply absolute top-2.5 right-2.5 rounded-full px-2.5 py-1 text-xs font-medium text-white;
+    @apply absolute top-2.5 right-2.5 rounded-full px-2.5 py-1 text-xs font-medium text-white shadow-md;
+  }
+  
+  /* Стили для разных уровней наличия товара */
+  .status-badge.low-stock {
+    @apply bg-red-500 animate-pulse;
+  }
+  
+  .status-badge.high-stock {
+    @apply bg-green-500;
+  }
+  
+  /* Стиль для пульсирующего индикатора наличия */
+  .status-indicator {
+    @apply inline-block w-2 h-2 rounded-full mr-1;
+  }
+  
+  .status-indicator.pulse {
+    animation: status-pulse 2s infinite;
+  }
+  
+  @keyframes status-pulse {
+    0% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: scale(1.2);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }
