@@ -2,6 +2,7 @@ import { Link } from 'wouter';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Product, ProductStatus } from '@shared/schema';
 import { Button } from '@/components/ui/button';
+import { InventoryDisplay } from '@/components/inventory-display';
 
 interface ProductCardProps {
   product: Product;
@@ -53,11 +54,21 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
         <p className={`text-gray-400 text-sm ${featured ? 'line-clamp-2 mb-0' : 'mb-4'}`}>{description}</p>
         
         {!featured && (
-          <Link href={`/product/${id}`}>
-            <Button variant="link" className="text-primary font-medium p-0 h-auto">
-              Подробнее
-            </Button>
-          </Link>
+          <>
+            <div className="mb-4">
+              <InventoryDisplay 
+                productId={id} 
+                totalQuantity={quantity}
+                showTitle={false}
+              />
+            </div>
+            
+            <Link href={`/product/${id}`}>
+              <Button variant="link" className="text-primary font-medium p-0 h-auto">
+                Подробнее
+              </Button>
+            </Link>
+          </>
         )}
       </div>
     </div>

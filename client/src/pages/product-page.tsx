@@ -9,6 +9,7 @@ import { useProduct } from '@/hooks/use-products';
 import { useCategory } from '@/hooks/use-categories';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { ProductStatus } from '@shared/schema';
+import { InventoryDisplay } from '@/components/inventory-display';
 
 export default function ProductPage() {
   const [match, params] = useRoute('/product/:id');
@@ -134,6 +135,14 @@ export default function ProductPage() {
                     Артикул: {product.sku}
                   </div>
                 )}
+                
+                <div className="mt-6">
+                  <Separator className="mb-4" />
+                  <InventoryDisplay 
+                    productId={product.id} 
+                    totalQuantity={product.quantity}
+                  />
+                </div>
               </div>
             </div>
           </div>

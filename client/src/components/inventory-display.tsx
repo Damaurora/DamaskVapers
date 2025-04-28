@@ -14,7 +14,7 @@ export function InventoryDisplay({
   totalQuantity, 
   showTitle = true 
 }: InventoryDisplayProps) {
-  const { data: stores } = useStores();
+  const { stores } = useStores();
   const { data: inventory, isLoading } = useProductInventory(productId);
 
   // Если данные загружаются, показываем индикатор загрузки
@@ -37,8 +37,8 @@ export function InventoryDisplay({
 
   // Если есть магазины, но нет данных о наличии для некоторых из них,
   // добавляем пустые записи для этих магазинов
-  const displayInventory = stores?.map(store => {
-    const storeInventory = inventory.find(item => item.storeId === store.id);
+  const displayInventory = stores?.map((store) => {
+    const storeInventory = inventory.find((item) => item.storeId === store.id);
     return {
       storeId: store.id,
       storeName: store.name,
@@ -67,7 +67,7 @@ export function InventoryDisplay({
         </div>
       )}
       <div className="flex flex-col space-y-2">
-        {displayInventory.map(item => (
+        {displayInventory.map((item) => (
           <div 
             key={item.storeId} 
             className="flex items-center justify-between rounded bg-secondary/50 px-3 py-2"
