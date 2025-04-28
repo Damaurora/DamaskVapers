@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { LogoIcon } from "@/components/icons";
+import { InventorySummary } from "@/components/inventory-summary";
 
 // Схема валидации формы
 const formSchema = z.object({
@@ -239,6 +240,8 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Основная форма настроек */}
               <div className="lg:col-span-2 space-y-6">
+                <InventorySummary />
+                
                 <Form {...form}>
                   <form>
                     <Card className="bg-[#1E1E1E] border-gray-800 text-white">

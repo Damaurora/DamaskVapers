@@ -23,9 +23,9 @@ import { Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
 
 export function InventorySummary() {
   const { stores, isLoading: isStoresLoading } = useStores();
-  const { data: products, isLoading: isProductsLoading } = useProducts();
+  const { products, isLoading: isProductsLoading } = useProducts();
   const { data: settings } = useSettings();
-  const [productWithInventory, setProductWithInventory] = useState<any[]>([]);
+  const [productWithInventory, setProductWithInventory] = useState<Array<any>>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Загружаем данные инвентаря для каждого товара
@@ -81,7 +81,7 @@ export function InventorySummary() {
   // Индикатор состояния по количеству
   const getStockStatusIndicator = (quantity: number) => {
     if (quantity <= 0) return <Badge variant="destructive">Нет</Badge>;
-    if (quantity <= 3) return <Badge variant="warning" className="bg-yellow-500">Мало</Badge>;
+    if (quantity <= 3) return <Badge variant="outline" className="bg-yellow-500 text-white">Мало</Badge>;
     if (quantity > 10) return <Badge variant="outline" className="bg-green-500 text-white">Много</Badge>;
     return <Badge variant="outline" className="bg-blue-500 text-white">Есть</Badge>;
   };
