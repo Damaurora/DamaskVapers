@@ -74,6 +74,8 @@ export default function ProductForm({ mode }: ProductFormProps) {
   const formSchema = z.object({
     name: z.string().min(1, "Название обязательно"),
     description: z.string().min(1, "Описание обязательно"),
+    slug: z.string().min(1, "URL-адрес обязателен")
+      .regex(/^[a-z0-9-]+$/, "Только строчные буквы, цифры и дефисы"),
     categoryId: z.number({
       required_error: "Выберите категорию",
       invalid_type_error: "Категория должна быть числом",
