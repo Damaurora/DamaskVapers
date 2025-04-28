@@ -40,22 +40,22 @@ export default function Dashboard() {
           <nav className="flex-1 p-4">
             <div className="space-y-1">
               <Link href="/admin">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white">
                   <BarChart2 className="mr-3 h-5 w-5" />
                   Обзор
-                </a>
+                </div>
               </Link>
               <Link href="/admin/products">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
                   <Package className="mr-3 h-5 w-5" />
                   Товары
-                </a>
+                </div>
               </Link>
               <Link href="/admin/settings">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
                   <Settings className="mr-3 h-5 w-5" />
                   Настройки
-                </a>
+                </div>
               </Link>
             </div>
           </nav>
@@ -110,31 +110,26 @@ export default function Dashboard() {
             </div>
           </div>
           
-          <Tabs defaultValue="overview">
-            <TabsList className="grid grid-cols-3 w-full">
-              <TabsTrigger value="overview">Обзор</TabsTrigger>
-              <TabsTrigger value="products">Товары</TabsTrigger>
-              <TabsTrigger value="settings">Настройки</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="overview" className="hidden">
-              {/* This is just for navigation, content is below */}
-            </TabsContent>
-            <TabsContent value="products" className="hidden">
-              <div className="flex justify-center p-4">
-                <Link href="/admin/products">
-                  <Button className="w-full">Перейти к товарам</Button>
-                </Link>
-              </div>
-            </TabsContent>
-            <TabsContent value="settings" className="hidden">
-              <div className="flex justify-center p-4">
-                <Link href="/admin/settings">
-                  <Button className="w-full">Перейти к настройкам</Button>
-                </Link>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <div className="flex space-x-1 p-2 overflow-x-auto">
+            <Link href="/admin">
+              <Button variant="default" size="sm" className="whitespace-nowrap bg-primary">
+                <BarChart2 className="w-4 h-4 mr-2" />
+                Обзор
+              </Button>
+            </Link>
+            <Link href="/admin/products">
+              <Button variant="ghost" size="sm" className="whitespace-nowrap">
+                <Package className="w-4 h-4 mr-2" />
+                Товары
+              </Button>
+            </Link>
+            <Link href="/admin/settings">
+              <Button variant="ghost" size="sm" className="whitespace-nowrap">
+                <Settings className="w-4 h-4 mr-2" />
+                Настройки
+              </Button>
+            </Link>
+          </div>
         </div>
         
         {/* Main content */}

@@ -68,6 +68,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Выход из системы",
         description: "Вы успешно вышли из системы",
       });
+      
+      // Перенаправление на главную страницу после выхода
+      window.location.href = "/";
     },
     onError: (error: Error) => {
       toast({
