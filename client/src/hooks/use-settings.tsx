@@ -3,11 +3,11 @@ import { apiRequest } from '@/lib/queryClient';
 import { Settings, InsertSettings } from '@shared/schema';
 
 export function useSettings() {
-  const { data: settings, isLoading, error } = useQuery<Settings>({
+  const { data, isLoading, error } = useQuery<Settings>({
     queryKey: ['/api/settings'],
   });
 
-  return { settings, isLoading, error };
+  return { data, isLoading, error };
 }
 
 export function useUpdateSettings() {

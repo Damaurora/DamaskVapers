@@ -103,7 +103,9 @@ export class MemStorage implements IStorage {
       id: 1,
       logo: "/logo.svg",
       shopName: "Damask Shop",
-      googleSheetUrl: "",
+      description: "Магазин электронных сигарет и вейп-устройств",
+      googleSheetsUrl: null,
+      googleApiKey: null,
       syncFrequency: "manual"
     };
     
@@ -305,10 +307,11 @@ export class DatabaseStorage implements IStorage {
         
         // Create default settings
         await db.insert(settings).values({
-          id: 1,
-          logo: "/logo.svg",
           shopName: "Damask Shop",
-          googleSheetUrl: "",
+          description: "Магазин электронных сигарет и вейп-устройств",
+          logo: "/logo.svg",
+          googleSheetsUrl: null,
+          googleApiKey: null,
           syncFrequency: "manual"
         });
         

@@ -4,7 +4,7 @@ import { useSettings } from '@/hooks/use-settings';
 import { useState } from 'react';
 
 export default function Footer() {
-  const { settings } = useSettings();
+  const { data } = useSettings();
   const [showAdminModal, setShowAdminModal] = useState(false);
   
   const handleAdminClick = () => {
@@ -88,7 +88,7 @@ export default function Footer() {
               <div className="flex items-center cursor-pointer">
                 <LogoIcon className="w-6 h-6 mr-3" />
                 <h1 className="text-lg font-bold font-montserrat text-white">
-                  <span className="text-primary neon-effect">{settings?.shopName?.split(' ')[0] || 'Damask'}</span> {settings?.shopName?.split(' ')[1] || 'Shop'}
+                  <span className="text-primary neon-effect">{data?.shopName?.split(' ')[0] || 'Damask'}</span> {data?.shopName?.split(' ')[1] || 'Shop'}
                 </h1>
               </div>
             </Link>

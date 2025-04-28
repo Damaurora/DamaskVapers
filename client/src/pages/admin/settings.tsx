@@ -46,17 +46,17 @@ export default function SettingsPage() {
   });
   
   // Обновление формы при загрузке данных
-  useState(() => {
-    if (settings) {
+  useEffect(() => {
+    if (data) {
       form.reset({
-        shopName: settings.shopName || "",
-        shopDescription: settings.description || "",
-        logoUrl: settings.logo || "",
-        googleSheetsUrl: settings.googleSheetsUrl || "",
-        googleApiKey: settings.googleApiKey || "",
+        shopName: data.shopName || "",
+        shopDescription: data.description || "",
+        logoUrl: data.logo || "",
+        googleSheetsUrl: data.googleSheetsUrl || "",
+        googleApiKey: data.googleApiKey || "",
       });
     }
-  });
+  }, [data, form]);
   
   // Обработка отправки формы
   const onSubmit = async (values: z.infer<typeof formSchema>) => {

@@ -57,6 +57,7 @@ export const products = pgTable("products", {
   image: text("image"),
   categoryId: integer("category_id").notNull(),
   status: text("status").notNull(),  // "in_stock", "out_of_stock", "coming_soon"
+  quantity: integer("quantity").default(0),  // Точное количество товара в наличии
   sku: text("sku"),
   isFeatured: boolean("is_featured").default(false),
   specifications: jsonb("specifications"),

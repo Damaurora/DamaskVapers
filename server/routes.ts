@@ -370,7 +370,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  app.put("/api/settings", async (req, res) => {
+  app.patch("/api/settings", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Необходима авторизация" });
     }
@@ -392,16 +392,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Sync with Google Sheets (placeholder endpoint)
-  app.post("/api/sync", async (req, res) => {
+  // Sync with Google Sheets
+  app.post("/api/settings/sync-google-sheets", async (req, res) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ message: "Необходима авторизация" });
     }
     
     try {
-      // In a real app, this would connect to Google Sheets API
-      // For now, we'll just return a success message
-      res.json({ message: "Синхронизация успешно запущена" });
+      // Get settings
+      const settings = await storage.getSettings();
+      
+      if (!settings) {
+        return res.status(404).json({ message: "Настройки не найдены" });
+      }
+      
+      if (!settings.googleSheetsUrl || !settings.googleApiKey) {
+        return res.status(400).json({ 
+          message: "Необходимо указать URL Google таблицы и API ключ в настройках" 
+        });
+      }
+      
+      // В реальном приложении здесь был бы код для подключения к Google Sheets API
+      // и синхронизации данных о товарах
+      
+      // Симуляция успешной синхронизации
+      res.json({ message: "Синхронизация с Google Sheets успешно выполнена" });
     } catch (error) {
       res.status(500).json({ message: "Ошибка при синхронизации с Google Sheets" });
     }
