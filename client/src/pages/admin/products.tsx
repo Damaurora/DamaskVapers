@@ -121,22 +121,22 @@ export default function Products() {
           <nav className="flex-1 p-4">
             <div className="space-y-1">
               <Link href="/admin">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer">
                   <BarChart2 className="mr-3 h-5 w-5" />
                   Обзор
-                </a>
+                </div>
               </Link>
               <Link href="/admin/products">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white cursor-pointer">
                   <Package className="mr-3 h-5 w-5" />
                   Товары
-                </a>
+                </div>
               </Link>
               <Link href="/admin/settings">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer">
                   <Settings className="mr-3 h-5 w-5" />
                   Настройки
-                </a>
+                </div>
               </Link>
             </div>
           </nav>

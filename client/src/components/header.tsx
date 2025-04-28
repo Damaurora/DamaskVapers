@@ -37,12 +37,12 @@ export default function Header({ onSearch }: { onSearch?: (query: string) => voi
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="flex items-center mb-4 md:mb-0">
             <Link href="/">
-              <a className="flex items-center">
+              <div className="flex items-center cursor-pointer">
                 <LogoIcon className="w-10 h-10 mr-3" />
                 <h1 className="text-2xl font-bold font-montserrat text-white">
                   <span className="text-primary neon-effect">{settings?.shopName?.split(' ')[0] || 'Damask'}</span> {settings?.shopName?.split(' ')[1] || 'Shop'}
                 </h1>
-              </a>
+              </div>
             </Link>
           </div>
           
