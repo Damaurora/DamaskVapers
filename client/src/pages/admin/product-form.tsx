@@ -83,6 +83,7 @@ export default function ProductForm({ mode }: ProductFormProps) {
     status: z.string({
       required_error: "Выберите статус",
     }),
+    quantity: z.number().min(0, "Количество не может быть отрицательным").default(0),
     sku: z.string().optional(),
     isFeatured: z.boolean().default(false),
   });
@@ -118,6 +119,7 @@ export default function ProductForm({ mode }: ProductFormProps) {
       slug: "",
       categoryId: 0,
       status: ProductStatus.IN_STOCK,
+      quantity: 0,
       sku: "",
       isFeatured: false,
     },
@@ -132,6 +134,7 @@ export default function ProductForm({ mode }: ProductFormProps) {
         slug: product.slug,
         categoryId: product.categoryId,
         status: product.status,
+        quantity: product.quantity || 0,
         sku: product.sku || "",
         isFeatured: product.isFeatured || false,
       });
