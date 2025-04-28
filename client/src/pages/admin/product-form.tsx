@@ -89,12 +89,33 @@ export default function ProductForm({ mode }: ProductFormProps) {
 
   type FormValues = z.infer<typeof formSchema>;
   
+  // Функция для генерации слага из названия
+  const generateSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/[^\wа-яё]/gi, '-')  // Заменяем небуквенно-цифровые символы на дефисы
+      .replace(/[а-яё]/gi, (match) => {
+        // Транслитерация русских букв
+        const translit: Record<string, string> = {
+          'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'yo', 
+          'ж': 'zh', 'з': 'z', 'и': 'i', 'й': 'y', 'к': 'k', 'л': 'l', 'м': 'm', 
+          'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 
+          'ф': 'f', 'х': 'h', 'ц': 'ts', 'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 
+          'ы': 'y', 'ь': '', 'э': 'e', 'ю': 'yu', 'я': 'ya'
+        };
+        return translit[match.toLowerCase()] || match;
+      })
+      .replace(/-+/g, '-')          // Заменяем множественные дефисы на один
+      .replace(/^-+|-+$/g, '');     // Удаляем дефисы с начала и конца
+  };
+
   // Create form with react-hook-form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
+      slug: "",
       categoryId: 0,
       status: ProductStatus.IN_STOCK,
       sku: "",
@@ -108,10 +129,11 @@ export default function ProductForm({ mode }: ProductFormProps) {
       form.reset({
         name: product.name,
         description: product.description,
+        slug: product.slug,
         categoryId: product.categoryId,
         status: product.status,
         sku: product.sku || "",
-        isFeatured: product.isFeatured,
+        isFeatured: product.isFeatured || false,
       });
       
       setImageUrl(product.image || "");
@@ -220,22 +242,22 @@ export default function ProductForm({ mode }: ProductFormProps) {
           <nav className="flex-1 p-4">
             <div className="space-y-1">
               <Link href="/admin">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer">
                   <BarChart2 className="mr-3 h-5 w-5" />
                   Обзор
-                </a>
+                </div>
               </Link>
               <Link href="/admin/products">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md bg-primary text-white cursor-pointer">
                   <Package className="mr-3 h-5 w-5" />
                   Товары
-                </a>
+                </div>
               </Link>
               <Link href="/admin/settings">
-                <a className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white">
+                <div className="flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-800 hover:text-white cursor-pointer">
                   <Settings className="mr-3 h-5 w-5" />
                   Настройки
-                </a>
+                </div>
               </Link>
             </div>
           </nav>
@@ -365,8 +387,58 @@ export default function ProductForm({ mode }: ProductFormProps) {
                                   {...field} 
                                   placeholder="Введите название товара" 
                                   className="bg-secondary border-gray-700 text-white"
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                    // Автоматическая генерация slug при вводе названия, если slug еще пустой
+                                    if (!form.getValues().slug) {
+                                      form.setValue("slug", generateSlug(e.target.value));
+                                    }
+                                  }}
                                 />
                               </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="slug"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>URL-адрес товара</FormLabel>
+                              <div className="flex flex-col space-y-2">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0 bg-gray-800 px-3 py-2 text-xs text-gray-400 border border-r-0 rounded-l-md border-gray-700">
+                                    /products/
+                                  </div>
+                                  <FormControl>
+                                    <Input 
+                                      {...field} 
+                                      placeholder="url-adres-tovara" 
+                                      className="bg-secondary border-gray-700 text-white rounded-l-none"
+                                    />
+                                  </FormControl>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  className="self-start border-gray-700 text-xs"
+                                  onClick={() => {
+                                    const name = form.getValues().name;
+                                    if (name) {
+                                      form.setValue("slug", generateSlug(name));
+                                    }
+                                  }}
+                                >
+                                  <LinkIcon className="mr-2 h-3 w-3" />
+                                  Создать из названия
+                                </Button>
+                              </div>
+                              <FormDescription className="text-xs text-gray-400">
+                                Используйте только строчные буквы латиницы, цифры и дефисы
+                              </FormDescription>
                               <FormMessage />
                             </FormItem>
                           )}
