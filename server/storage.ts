@@ -4,10 +4,12 @@ import {
   products, 
   stores, 
   settings,
+  productInventory,
   type User, 
   type InsertUser, 
   type Category, 
   type InsertCategory,
+  type ProductInventory,
   type Product, 
   type InsertProduct,
   type Store, 
@@ -58,6 +60,12 @@ export interface IStorage {
   // Settings
   getSettings(): Promise<Settings | undefined>;
   updateSettings(settings: Partial<InsertSettings>): Promise<Settings | undefined>;
+  
+  // Inventory
+  getProductInventory(productId: number, storeId: number): Promise<ProductInventory | undefined>;
+  getProductInventoryByProduct(productId: number): Promise<ProductInventory[]>;
+  getProductInventoryByStore(storeId: number): Promise<ProductInventory[]>;
+  updateProductInventory(productId: number, storeId: number, quantity: number): Promise<ProductInventory | undefined>;
   
   // Session store
   sessionStore: any; // Type для session.SessionStore
@@ -277,6 +285,27 @@ export class MemStorage implements IStorage {
     this.settings = { ...this.settings, ...settingsUpdate };
     return this.settings;
   }
+
+  // Inventory
+  async getProductInventory(productId: number, storeId: number): Promise<ProductInventory | undefined> {
+    // MemStorage не имеет реализации инвентаря, при необходимости можно добавить
+    return undefined;
+  }
+
+  async getProductInventoryByProduct(productId: number): Promise<ProductInventory[]> {
+    // MemStorage не имеет реализации инвентаря, возвращаем пустой массив
+    return [];
+  }
+
+  async getProductInventoryByStore(storeId: number): Promise<ProductInventory[]> {
+    // MemStorage не имеет реализации инвентаря, возвращаем пустой массив
+    return [];
+  }
+
+  async updateProductInventory(productId: number, storeId: number, quantity: number): Promise<ProductInventory | undefined> {
+    // MemStorage не имеет реализации инвентаря, при необходимости можно добавить
+    return undefined;
+  }
 }
 
 // Database implementation
@@ -482,6 +511,73 @@ export class DatabaseStorage implements IStorage {
       .where(eq(settings.id, 1))
       .returning();
     return updatedSettings;
+  }
+
+  // Inventory
+  async getProductInventory(productId: number, storeId: number): Promise<ProductInventory | undefined> {
+    const result = await db
+      .select()
+      .from(productInventory)
+      .where(
+        and(
+          eq(productInventory.productId, productId),
+          eq(productInventory.storeId, storeId)
+        )
+      );
+    
+    return result[0];
+  }
+
+  async getProductInventoryByProduct(productId: number): Promise<ProductInventory[]> {
+    return await db
+      .select()
+      .from(productInventory)
+      .where(eq(productInventory.productId, productId));
+  }
+
+  async getProductInventoryByStore(storeId: number): Promise<ProductInventory[]> {
+    return await db
+      .select()
+      .from(productInventory)
+      .where(eq(productInventory.storeId, storeId));
+  }
+
+  async updateProductInventory(productId: number, storeId: number, quantity: number): Promise<ProductInventory | undefined> {
+    try {
+      // Проверяем существует ли запись
+      const existingInventory = await this.getProductInventory(productId, storeId);
+      
+      if (existingInventory) {
+        // Обновляем существующую запись
+        const [updated] = await db
+          .update(productInventory)
+          .set({ quantity })
+          .where(
+            and(
+              eq(productInventory.productId, productId),
+              eq(productInventory.storeId, storeId)
+            )
+          )
+          .returning();
+        
+        return updated;
+      } else {
+        // Создаем новую запись
+        const [created] = await db
+          .insert(productInventory)
+          .values({
+            productId,
+            storeId,
+            quantity
+          })
+          .returning();
+        
+        return created;
+      }
+    } catch (error) {
+      console.error('Ошибка при обновлении инвентаря:', error);
+      return undefined;
+    }
   }
 }
 
