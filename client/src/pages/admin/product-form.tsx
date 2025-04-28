@@ -602,12 +602,27 @@ export default function ProductForm({ mode }: ProductFormProps) {
                                   />
                                 </FormControl>
                                 <FormDescription className="text-gray-400">
-                                  Укажите точное количество товара на складе
+                                  Укажите общее количество товара на складе
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
+                          
+                          {/* Компонент для управления наличием в каждом магазине */}
+                          {mode === "edit" && product && (
+                            <div className="space-y-4 pt-2 pb-4">
+                              <FormLabel>Наличие в магазинах</FormLabel>
+                              <FormDescription className="text-gray-400">
+                                Укажите точное количество товара в каждом магазине
+                              </FormDescription>
+                              <StoreInventoryInput
+                                productId={product.id}
+                                onInventoryChange={handleInventoryChange}
+                                className="mt-2"
+                              />
+                            </div>
+                          )}
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
