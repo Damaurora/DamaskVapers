@@ -12,6 +12,7 @@ import ProductForm from "@/pages/admin/product-form";
 import Settings from "@/pages/admin/settings";
 import { ProtectedRoute } from "@/lib/protected-route";
 import AdminLoginModal from "@/components/admin-login-modal";
+import AgeVerificationModal from "@/components/age-verification-modal";
 import { useRef, useState } from "react";
 
 function Router() {
@@ -53,6 +54,7 @@ function App() {
             onClose={closeLoginModal} 
             ref={loginModalRef} 
           />
+          <AgeVerificationModal />
           <Toaster />
         </div>
         <div id="admin-login-trigger" className="hidden" onClick={openLoginModal} />
