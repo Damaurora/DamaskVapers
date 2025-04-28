@@ -53,6 +53,7 @@ export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
+  slug: text("slug").notNull().unique(),
   image: text("image"),
   categoryId: integer("category_id").notNull(),
   status: text("status").notNull(),  // "in_stock", "out_of_stock", "coming_soon"
@@ -64,6 +65,7 @@ export const products = pgTable("products", {
 export const insertProductSchema = createInsertSchema(products).pick({
   name: true,
   description: true,
+  slug: true,
   image: true,
   categoryId: true,
   status: true,

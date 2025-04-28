@@ -63,7 +63,7 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-montserrat font-semibold mb-4">Сервис</h3>
             <ul className="space-y-2">
-              <li><Link href="/"><a className="text-gray-300 hover:text-white">Каталог товаров</a></Link></li>
+              <li><Link href="/"><div className="text-gray-300 hover:text-white cursor-pointer">Каталог товаров</div></Link></li>
               <li><a href="#" className="text-gray-300 hover:text-white">Новинки</a></li>
               <li><a href="#" className="text-gray-300 hover:text-white">Акции</a></li>
               <li>
@@ -85,12 +85,12 @@ export default function Footer() {
         <div className="border-t border-gray-800 pt-6 flex flex-col md:flex-row items-center justify-between">
           <div className="flex items-center mb-4 md:mb-0">
             <Link href="/">
-              <a className="flex items-center">
+              <div className="flex items-center cursor-pointer">
                 <LogoIcon className="w-6 h-6 mr-3" />
                 <h1 className="text-lg font-bold font-montserrat text-white">
                   <span className="text-primary neon-effect">{settings?.shopName?.split(' ')[0] || 'Damask'}</span> {settings?.shopName?.split(' ')[1] || 'Shop'}
                 </h1>
-              </a>
+              </div>
             </Link>
           </div>
           
