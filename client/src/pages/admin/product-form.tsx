@@ -12,6 +12,7 @@ import { LogoIcon } from "@/components/icons";
 import { useAuth } from "@/hooks/use-auth";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, BarChart2, Package, Settings, ArrowLeft, Plus, X, UploadCloud, Link as LinkIcon } from "lucide-react";
+import { StoreInventoryInput } from "@/components/store-inventory-input";
 import { useCategories } from "@/hooks/use-categories";
 import { useProduct, useCreateProduct, useUpdateProduct } from "@/hooks/use-products";
 import { useToast } from "@/hooks/use-toast";
@@ -125,6 +126,37 @@ export default function ProductForm({ mode }: ProductFormProps) {
     },
   });
   
+  // Store inventory data for each store
+  const [storeInventory, setStoreInventory] = useState<Record<number, number>>({});
+  
+  // Handle inventory change
+  const handleInventoryChange = (storeId: number, quantity: number) => {
+    setStoreInventory(prev => ({
+      ...prev,
+      [storeId]: quantity
+    }));
+  };
+  
+  // Update inventory after form submission
+  const updateInventory = async (productId: number) => {
+    try {
+      // For each store, update the inventory
+      const updatePromises = Object.entries(storeInventory).map(([storeId, quantity]) => {
+        return fetch(`/api/inventory/${productId}/${storeId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ quantity }),
+        });
+      });
+      
+      await Promise.all(updatePromises);
+    } catch (error) {
+      console.error('Ошибка при обновлении наличия:', error);
+    }
+  };
+  
   // Load existing product data if in edit mode
   useEffect(() => {
     if (mode === "edit" && product) {
@@ -157,8 +189,11 @@ export default function ProductForm({ mode }: ProductFormProps) {
         specifications: Object.keys(specs).length > 0 ? specs : undefined,
       };
       
+      let productId: number;
+      
       if (mode === "create") {
-        await createProduct.mutateAsync(productData as InsertProduct);
+        const newProduct = await createProduct.mutateAsync(productData as InsertProduct);
+        productId = newProduct.id;
         toast({
           title: "Товар добавлен",
           description: "Новый товар успешно добавлен в каталог",
@@ -168,15 +203,24 @@ export default function ProductForm({ mode }: ProductFormProps) {
           id: product.id,
           product: productData,
         });
+        productId = product.id;
         toast({
           title: "Товар обновлен",
           description: "Изменения успешно сохранены",
         });
+      } else {
+        throw new Error("Некорректный режим или отсутствуют данные товара");
+      }
+      
+      // Обновляем информацию о наличии в магазинах
+      if (Object.keys(storeInventory).length > 0) {
+        await updateInventory(productId);
       }
       
       // Navigate back to products list
       setLocation("/admin/products");
     } catch (error) {
+      console.error(error);
       toast({
         title: "Ошибка",
         description: "Не удалось сохранить товар",
