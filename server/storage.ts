@@ -324,7 +324,9 @@ export class DatabaseStorage implements IStorage {
 
   private async initializeDefaultData() {
     try {
-      // Check if we need to initialize default data
+      await pool.connect(); // Проверяем подключение к БД
+      
+      // Проверяем необходимость инициализации данных
       const userCount = await db.select({ count: users }).from(users);
       
       if (!userCount || userCount.length === 0 || userCount[0].count === 0) {
