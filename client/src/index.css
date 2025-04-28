@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Montserrat:wght@500;600;700&display=swap');
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 20 14.3% 4.1%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 20 14.3% 4.1%;
+  --card: 0 0% 100%;
+  --card-foreground: 20 14.3% 4.1%;
+  --border: 20 5.9% 90%;
+  --input: 20 5.9% 90%;
+  --primary: 25 100% 50%;
+  --primary-foreground: 60 9.1% 97.8%;
+  --secondary: 240 10% 3.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 24 9.8% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 60 9.1% 97.8%;
+  --ring: 25 100% 50%;
+  --radius: 0.5rem;
+  
+  /* Status Colors */
+  --status-success: 142 76% 36%;
+  --status-danger: 0 84% 60%;
+  --status-warning: 38 92% 50%;
+  
+  /* Chart Colors */
+  --chart-1: 25 100% 50%;
+  --chart-2: 38 92% 50%;
+  --chart-3: 142 76% 36%;
+  --chart-4: 201 96% 32%;
+  --chart-5: 256 78% 56%;
+  
+  /* Custom Colors */
+  --secondary-light: 240 3.7% 15.9%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --primary: 25 100% 50%;
+  --primary-foreground: 60 9.1% 97.8%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 25 100% 50%;
+  --radius: 0.5rem;
+  
+  /* Custom Dark Colors */
+  --secondary-light: 240 3.7% 15.9%;
+}
+
+body {
+  @apply bg-[#121212] text-white font-inter antialiased;
+}
+
+.font-montserrat {
+  font-family: 'Montserrat', sans-serif;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
+}
+
+.neon-effect {
+  text-shadow: 0 0 10px rgba(255, 107, 0, 0.8), 0 0 20px rgba(255, 107, 0, 0.5);
+}
+
+.neon-border {
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.5);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+}
+
+@layer components {
+  .product-card {
+    @apply transition-all duration-300;
+  }
+  
+  .product-card:hover {
+    @apply transform -translate-y-1 shadow-lg shadow-primary/20;
+  }
+  
+  .status-badge {
+    @apply absolute top-2.5 right-2.5 rounded-full px-2.5 py-1 text-xs font-medium text-white;
+  }
+}
