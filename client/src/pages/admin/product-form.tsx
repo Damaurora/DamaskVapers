@@ -540,6 +540,30 @@ export default function ProductForm({ mode }: ProductFormProps) {
                               </FormItem>
                             )}
                           />
+                          
+                          <FormField
+                            control={form.control}
+                            name="quantity"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Количество товара</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    value={field.value}
+                                    min={0}
+                                    className="bg-secondary border-gray-700 text-white"
+                                  />
+                                </FormControl>
+                                <FormDescription className="text-gray-400">
+                                  Укажите точное количество товара на складе
+                                </FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
                         </div>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

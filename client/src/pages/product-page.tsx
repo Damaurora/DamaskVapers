@@ -59,7 +59,7 @@ export default function ProductPage() {
   const getStatusText = (status: string) => {
     switch(status) {
       case ProductStatus.IN_STOCK:
-        return 'В наличии';
+        return product.quantity && product.quantity > 0 ? `В наличии (${product.quantity} шт.)` : 'В наличии';
       case ProductStatus.OUT_OF_STOCK:
         return 'Не в наличии';
       case ProductStatus.COMING_SOON:

@@ -9,14 +9,14 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, featured = false }: ProductCardProps) {
-  const { id, name, description, image, status } = product;
+  const { id, name, description, image, status, quantity } = product;
   
   const placeholderImage = "https://images.unsplash.com/photo-1560373719-cc5a72e018d8?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&h=250&q=80";
   
   const getStatusText = (status: string) => {
     switch(status) {
       case ProductStatus.IN_STOCK:
-        return 'В наличии';
+        return quantity && quantity > 0 ? `В наличии (${quantity} шт.)` : 'В наличии';
       case ProductStatus.OUT_OF_STOCK:
         return 'Не в наличии';
       case ProductStatus.COMING_SOON:
