@@ -48,6 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Успешный вход",
         description: "Вы успешно вошли в систему",
       });
+      
+      // Перенаправление в панель администратора
+      window.location.href = "/admin";
     },
     onError: (error: Error) => {
       toast({
