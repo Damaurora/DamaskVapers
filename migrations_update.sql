@@ -1,18 +1,12 @@
--- Добавляем поле quantity в таблицу products
-ALTER TABLE products ADD COLUMN IF NOT EXISTS quantity INTEGER DEFAULT 0;
+-- Добавляем новое поле в таблицу settings
+ALTER TABLE settings ADD COLUMN last_sync_time TEXT;
 
--- Обновляем таблицу settings
-ALTER TABLE settings 
-ADD COLUMN IF NOT EXISTS description TEXT,
-ADD COLUMN IF NOT EXISTS google_sheets_url TEXT,
-ADD COLUMN IF NOT EXISTS google_api_key TEXT;
-
--- Переименовываем поле google_sheet_url если оно существует
-DO $$
-BEGIN
-    IF EXISTS (SELECT 1 FROM information_schema.columns 
-               WHERE table_name = 'settings' AND column_name = 'google_sheet_url') THEN
-        ALTER TABLE settings RENAME COLUMN google_sheet_url TO google_sheets_url;
-    END IF;
-END
-$$;
+-- Создаем таблицу product_inventory, если она еще не существует
+CREATE TABLE IF NOT EXISTS product_inventory (
+  product_id INTEGER NOT NULL,
+  store_id INTEGER NOT NULL,
+  quantity INTEGER DEFAULT 0,
+  PRIMARY KEY (product_id, store_id),
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE,
+  FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE
+);

@@ -1,6 +1,7 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, jsonb, primaryKey } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // User schema
 export const users = pgTable("users", {
@@ -76,6 +77,45 @@ export const insertProductSchema = createInsertSchema(products).pick({
   specifications: true,
 });
 
+// Inventory schema (для хранения наличия товаров в конкретных магазинах)
+export const productInventory = pgTable("product_inventory", {
+  productId: integer("product_id").notNull(),
+  storeId: integer("store_id").notNull(),
+  quantity: integer("quantity").default(0),
+}, (table) => {
+  return {
+    pk: primaryKey({ columns: [table.productId, table.storeId] }),
+  }
+});
+
+export const insertProductInventorySchema = createInsertSchema(productInventory).pick({
+  productId: true,
+  storeId: true,
+  quantity: true,
+});
+
+// Определяем отношения между продуктами и инвентарём
+export const productsRelations = relations(products, ({ many }) => ({
+  inventory: many(productInventory),
+}));
+
+// Определяем отношения между магазинами и инвентарём
+export const storesRelations = relations(stores, ({ many }) => ({
+  inventory: many(productInventory),
+}));
+
+// Определяем отношения для инвентаря
+export const productInventoryRelations = relations(productInventory, ({ one }) => ({
+  product: one(products, {
+    fields: [productInventory.productId],
+    references: [products.id],
+  }),
+  store: one(stores, {
+    fields: [productInventory.storeId],
+    references: [stores.id],
+  }),
+}));
+
 // Site settings schema
 export const settings = pgTable("settings", {
   id: serial("id").primaryKey(),
@@ -85,6 +125,7 @@ export const settings = pgTable("settings", {
   googleSheetsUrl: text("google_sheets_url"),
   googleApiKey: text("google_api_key"),
   syncFrequency: text("sync_frequency").default("manual"),
+  lastSyncTime: text("last_sync_time"),
 });
 
 export const insertSettingsSchema = createInsertSchema(settings).pick({
@@ -94,6 +135,7 @@ export const insertSettingsSchema = createInsertSchema(settings).pick({
   googleSheetsUrl: true,
   googleApiKey: true,
   syncFrequency: true,
+  lastSyncTime: true,
 });
 
 // TypeScript types
@@ -108,6 +150,9 @@ export type Store = typeof stores.$inferSelect;
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
+
+export type InsertProductInventory = z.infer<typeof insertProductInventorySchema>;
+export type ProductInventory = typeof productInventory.$inferSelect;
 
 export type InsertSettings = z.infer<typeof insertSettingsSchema>;
 export type Settings = typeof settings.$inferSelect;

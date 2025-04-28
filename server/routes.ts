@@ -399,26 +399,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      // Get settings
-      const settings = await storage.getSettings();
+      // Импортируем функцию синхронизации
+      const { syncProductsWithGoogleSheets } = await import('./google-sheets');
       
-      if (!settings) {
-        return res.status(404).json({ message: "Настройки не найдены" });
-      }
+      // Синхронизируем данные с Google Sheets
+      await syncProductsWithGoogleSheets();
       
-      if (!settings.googleSheetsUrl || !settings.googleApiKey) {
-        return res.status(400).json({ 
-          message: "Необходимо указать URL Google таблицы и API ключ в настройках" 
-        });
-      }
-      
-      // В реальном приложении здесь был бы код для подключения к Google Sheets API
-      // и синхронизации данных о товарах
-      
-      // Симуляция успешной синхронизации
-      res.json({ message: "Синхронизация с Google Sheets успешно выполнена" });
-    } catch (error) {
-      res.status(500).json({ message: "Ошибка при синхронизации с Google Sheets" });
+      res.json({ 
+        message: "Синхронизация с Google Sheets успешно выполнена",
+        success: true
+      });
+    } catch (error: any) {
+      console.error('Ошибка синхронизации с Google Sheets:', error);
+      res.status(500).json({ 
+        message: error.message || "Ошибка при синхронизации с Google Sheets",
+        success: false
+      });
     }
   });
   
