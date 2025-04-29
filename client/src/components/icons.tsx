@@ -5,28 +5,9 @@ interface IconProps {
 }
 
 export const LogoIcon: React.FC<IconProps> = ({ className }) => {
-  return (
-    <svg 
-      className={className} 
-      viewBox="0 0 512 512" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <filter id="neon-glow" x="-50%" y="-50%" width="200%" height="200%">
-          <feFlood floodColor="#FF5500" floodOpacity="0.5" result="flood" />
-          <feComposite in="flood" in2="SourceGraphic" operator="in" result="mask" />
-          <feGaussianBlur in="mask" stdDeviation="10" result="blur" />
-          <feComposite in="SourceGraphic" in2="blur" operator="over" />
-        </filter>
-      </defs>
-      <g filter="url(#neon-glow)">
-        <path d="M255.998 64C247.747 118.947 219.403 164.127 175.997 192C219.403 219.873 247.747 265.053 255.998 320C264.25 265.053 292.594 219.873 336 192C292.594 164.127 264.25 118.947 255.998 64Z" fill="#FF7700" />
-        <path d="M256 128C251.2 160.32 235.2 186.88 208 204.8C235.2 222.72 251.2 249.28 256 281.6C260.8 249.28 276.8 222.72 304 204.8C276.8 186.88 260.8 160.32 256 128Z" fill="#FF9900" />
-        <path d="M192 256C192 155.5 236.5 81.2 256 48C275.5 81.2 320 155.5 320 256C320 330.1 293.3 388.5 256 448C218.7 388.5 192 330.1 192 256Z" fill="#FF5500" />
-      </g>
-    </svg>
-  );
+  const { data: settings } = useSettings();
+  const logoKey = settings?.logo?.split('/')[2]?.replace('.svg', '') || 'minimal';
+  return <div className={className}>{logoVariants[logoKey as keyof typeof logoVariants] || logoVariants.minimal}</div>;
 };
 
 export const PodIcon: React.FC<IconProps> = ({ className }) => {

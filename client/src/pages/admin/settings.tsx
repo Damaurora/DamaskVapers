@@ -308,16 +308,26 @@ export default function SettingsPage() {
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Логотип</FormLabel>
-                              <FormControl>
-                                <Input 
-                                  {...field} 
-                                  placeholder="Укажите URL логотипа" 
-                                  className="bg-secondary border-gray-700 text-white"
-                                />
-                              </FormControl>
-                              <FormDescription className="text-gray-500">
-                                Укажите относительный путь от корня сайта, например: /logo.svg
-                              </FormDescription>
+                              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                                {Object.entries(logoVariants).map(([key, Logo]) => (
+                                  <div
+                                    key={key}
+                                    className={`p-4 border rounded-lg cursor-pointer transition-all ${
+                                      field.value === `/logos/${key}.svg` 
+                                        ? 'border-primary bg-primary/10' 
+                                        : 'border-gray-700 hover:border-gray-600'
+                                    }`}
+                                    onClick={() => field.onChange(`/logos/${key}.svg`)}
+                                  >
+                                    <div className="w-full aspect-square flex items-center justify-center bg-secondary rounded-md p-4">
+                                      {Logo}
+                                    </div>
+                                    <p className="text-center mt-2 text-sm text-gray-400 capitalize">
+                                      {key}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
                               <FormMessage />
                             </FormItem>
                           )}
