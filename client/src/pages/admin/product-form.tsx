@@ -553,6 +553,7 @@ export default function ProductForm({ mode }: ProductFormProps) {
                                   onValueChange={field.onChange}
                                   defaultValue={field.value}
                                   value={field.value}
+                                  disabled={form.getValues().quantity > 0}
                                 >
                                   <FormControl>
                                     <SelectTrigger className="bg-secondary border-gray-700 text-white">
@@ -560,26 +561,36 @@ export default function ProductForm({ mode }: ProductFormProps) {
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent className="bg-[#1E1E1E] border-gray-700 text-white">
-                                    <SelectItem 
-                                      value={ProductStatus.IN_STOCK} 
-                                      className="focus:bg-gray-800 focus:text-white"
-                                    >
-                                      В наличии
-                                    </SelectItem>
-                                    <SelectItem 
-                                      value={ProductStatus.OUT_OF_STOCK} 
-                                      className="focus:bg-gray-800 focus:text-white"
-                                    >
-                                      Не в наличии
-                                    </SelectItem>
-                                    <SelectItem 
-                                      value={ProductStatus.COMING_SOON} 
-                                      className="focus:bg-gray-800 focus:text-white"
-                                    >
-                                      Ждём завоз
-                                    </SelectItem>
+                                    {form.getValues().quantity > 0 ? (
+                                      <SelectItem 
+                                        value={ProductStatus.IN_STOCK} 
+                                        className="focus:bg-gray-800 focus:text-white"
+                                      >
+                                        В наличии
+                                      </SelectItem>
+                                    ) : (
+                                      <>
+                                        <SelectItem 
+                                          value={ProductStatus.OUT_OF_STOCK} 
+                                          className="focus:bg-gray-800 focus:text-white"
+                                        >
+                                          Не в наличии
+                                        </SelectItem>
+                                        <SelectItem 
+                                          value={ProductStatus.COMING_SOON} 
+                                          className="focus:bg-gray-800 focus:text-white"
+                                        >
+                                          Ждём завоз
+                                        </SelectItem>
+                                      </>
+                                    )}
                                   </SelectContent>
                                 </Select>
+                                <FormDescription className="text-gray-400">
+                                  {form.getValues().quantity > 0 
+                                    ? "Статус автоматически установлен 'В наличии', так как количество товара больше 0" 
+                                    : "Выберите статус товара, так как количество равно 0"}
+                                </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -595,7 +606,16 @@ export default function ProductForm({ mode }: ProductFormProps) {
                                   <Input
                                     type="number"
                                     {...field}
-                                    onChange={(e) => field.onChange(Number(e.target.value))}
+                                    onChange={(e) => {
+                                      const newValue = Number(e.target.value);
+                                      field.onChange(newValue);
+                                      // Автоматически обновляем статус в зависимости от количества
+                                      if (newValue > 0) {
+                                        form.setValue("status", ProductStatus.IN_STOCK);
+                                      } else if (form.getValues().status === ProductStatus.IN_STOCK) {
+                                        form.setValue("status", ProductStatus.OUT_OF_STOCK);
+                                      }
+                                    }}
                                     value={field.value}
                                     min={0}
                                     className="bg-secondary border-gray-700 text-white"
