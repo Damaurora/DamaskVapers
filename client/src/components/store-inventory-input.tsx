@@ -49,7 +49,7 @@ export function StoreInventoryInput({
   }, [productId]);
 
   const handleQuantityChange = (storeId: number, value: string) => {
-    const quantity = parseInt(value, 10) || 0;
+    const quantity = value === '' ? 0 : parseInt(value, 10);
     setInventory(prev => ({ ...prev, [storeId]: quantity }));
     onInventoryChange(storeId, quantity);
   };

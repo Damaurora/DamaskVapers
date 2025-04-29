@@ -14,17 +14,17 @@ export default function Dashboard() {
   const { user, logoutMutation } = useAuth();
   const { products } = useProducts();
   const { categories } = useCategories();
-  
+
   const handleLogout = () => {
     logoutMutation.mutate();
   };
-  
+
   // Count products by status
   const inStockCount = products?.filter(p => p.status === ProductStatus.IN_STOCK).length || 0;
   const outOfStockCount = products?.filter(p => p.status === ProductStatus.OUT_OF_STOCK).length || 0;
   const comingSoonCount = products?.filter(p => p.status === ProductStatus.COMING_SOON).length || 0;
   const totalProductsCount = products?.length || 0;
-  
+
   return (
     <div className="min-h-screen bg-secondary">
       <div className="flex">
@@ -36,7 +36,7 @@ export default function Dashboard() {
               Панель администратора
             </h1>
           </div>
-          
+
           <nav className="flex-1 p-4">
             <div className="space-y-1">
               <Link href="/admin">
@@ -59,7 +59,7 @@ export default function Dashboard() {
               </Link>
             </div>
           </nav>
-          
+
           <div className="p-4 border-t border-gray-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -83,7 +83,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        
+
         {/* Mobile header */}
         <div className="md:hidden bg-[#1E1E1E] border-b border-gray-800 w-full fixed top-0 z-10">
           <div className="flex items-center justify-between p-4">
@@ -93,7 +93,7 @@ export default function Dashboard() {
                 Панель администратора
               </h1>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Button 
                 variant="ghost" 
@@ -109,7 +109,7 @@ export default function Dashboard() {
               </Button>
             </div>
           </div>
-          
+
           <div className="flex space-x-1 p-2 overflow-x-auto">
             <Link href="/admin">
               <Button variant="default" size="sm" className="whitespace-nowrap bg-primary">
@@ -118,20 +118,20 @@ export default function Dashboard() {
               </Button>
             </Link>
             <Link href="/admin/products">
-              <Button variant="ghost" size="sm" className="whitespace-nowrap">
+              <Button variant="ghost" size="sm" className="whitespace-nowrap text-white">
                 <Package className="w-4 h-4 mr-2" />
                 Товары
               </Button>
             </Link>
             <Link href="/admin/settings">
-              <Button variant="ghost" size="sm" className="whitespace-nowrap">
+              <Button variant="ghost" size="sm" className="whitespace-nowrap text-white">
                 <Settings className="w-4 h-4 mr-2" />
                 Настройки
               </Button>
             </Link>
           </div>
         </div>
-        
+
         {/* Main content */}
         <div className="flex-1 md:ml-64">
           <div className="container mx-auto px-4 py-8 md:py-6 mt-[118px] md:mt-0">
@@ -139,7 +139,7 @@ export default function Dashboard() {
               <h1 className="text-2xl font-bold font-montserrat">Обзор</h1>
               <p className="text-gray-400">Добро пожаловать в панель администратора Damask Shop.</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <Card className="bg-[#1E1E1E] border-gray-800 text-white">
                 <CardContent className="p-6">
@@ -154,7 +154,7 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-[#1E1E1E] border-gray-800 text-white">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -168,7 +168,7 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-[#1E1E1E] border-gray-800 text-white">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -182,7 +182,7 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-[#1E1E1E] border-gray-800 text-white">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -197,7 +197,7 @@ export default function Dashboard() {
                 </CardContent>
               </Card>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="bg-[#1E1E1E] border-gray-800 text-white col-span-1 lg:col-span-2">
                 <CardHeader>
@@ -216,9 +216,9 @@ export default function Dashboard() {
                       </Button>
                     </Link>
                   </div>
-                  
+
                   <Separator className="my-4 bg-gray-800" />
-                  
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">В наличии</span>
@@ -230,7 +230,7 @@ export default function Dashboard() {
                         style={{ width: `${totalProductsCount > 0 ? (inStockCount / totalProductsCount) * 100 : 0}%` }}
                       ></div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Не в наличии</span>
                       <span className="text-red-500 font-medium">{outOfStockCount}</span>
@@ -241,7 +241,7 @@ export default function Dashboard() {
                         style={{ width: `${totalProductsCount > 0 ? (outOfStockCount / totalProductsCount) * 100 : 0}%` }}
                       ></div>
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Ждём завоз</span>
                       <span className="text-yellow-500 font-medium">{comingSoonCount}</span>
@@ -255,7 +255,7 @@ export default function Dashboard() {
                   </div>
                 </CardContent>
               </Card>
-              
+
               <Card className="bg-[#1E1E1E] border-gray-800 text-white">
                 <CardHeader>
                   <CardTitle>Быстрые действия</CardTitle>

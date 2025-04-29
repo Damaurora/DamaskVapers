@@ -17,21 +17,21 @@ export default function HomePage() {
   const [location] = useLocation();
   const params = new URLSearchParams(location.split('?')[1]);
   const categoryParam = params.get('category');
-  
+
   const [activeFilter, setActiveFilter] = useState<string | null>(categoryParam);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [visibleCount, setVisibleCount] = useState(8);
-  
+
   const { categories, isLoading: isCategoriesLoading } = useCategories();
   const { products, isLoading: isProductsLoading } = useProducts();
   const { stores, isLoading: isStoresLoading } = useStores();
-  
+
   // Filter products based on active category and search query
   useEffect(() => {
     if (products) {
       let filtered = [...products];
-      
+
       // Apply category filter
       if (activeFilter) {
         const category = categories?.find(c => c.slug === activeFilter);
@@ -39,7 +39,7 @@ export default function HomePage() {
           filtered = filtered.filter(product => product.categoryId === category.id);
         }
       }
-      
+
       // Apply search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -48,34 +48,34 @@ export default function HomePage() {
           product.description.toLowerCase().includes(query)
         );
       }
-      
+
       setFilteredProducts(filtered);
     }
   }, [products, categories, activeFilter, searchQuery]);
-  
+
   // Update active filter when URL parameter changes
   useEffect(() => {
     if (categoryParam) {
       setActiveFilter(categoryParam);
     }
   }, [categoryParam]);
-  
+
   const handleFilterChange = (categorySlug: string | null) => {
     setActiveFilter(categorySlug);
     setVisibleCount(8); // Reset visible count when changing filters
   };
-  
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setVisibleCount(8); // Reset visible count when searching
   };
-  
+
   const handleLoadMore = () => {
     setVisibleCount(prev => prev + 8);
   };
-  
+
   const isLoading = isCategoriesLoading || isProductsLoading || isStoresLoading;
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -87,31 +87,20 @@ export default function HomePage() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header onSearch={handleSearch} />
-      
-      {/* Categories */}
-      <div className="bg-secondary py-6">
-        <div className="container mx-auto px-4">
-          <h2 className="text-xl font-montserrat font-semibold mb-6">Категории</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {categories?.map(category => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
-          </div>
-        </div>
-      </div>
-      
+
+
       {/* Top Products Carousel */}
       <ProductCarousel />
-      
+
       {/* Product Catalog */}
       <div className="py-10 bg-secondary">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-montserrat font-semibold mb-8">Каталог</h2>
-          
+
           <div className="mb-8 flex flex-wrap items-center gap-3">
             <span className="text-gray-300">Фильтры:</span>
             <div className="flex flex-wrap gap-2">
@@ -122,7 +111,7 @@ export default function HomePage() {
               >
                 Все товары
               </Button>
-              
+
               {categories?.map(category => (
                 <Button
                   key={category.id}
@@ -135,7 +124,7 @@ export default function HomePage() {
               ))}
             </div>
           </div>
-          
+
           {filteredProducts.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -143,7 +132,7 @@ export default function HomePage() {
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
-              
+
               {visibleCount < filteredProducts.length && (
                 <div className="mt-8 flex justify-center">
                   <Button 
@@ -166,12 +155,12 @@ export default function HomePage() {
           )}
         </div>
       </div>
-      
+
       {/* Store Locations */}
       <div className="py-10 bg-[#1E1E1E]">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-montserrat font-semibold mb-8">Наши магазины</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {stores?.map(store => (
               <StoreLocationCard key={store.id} store={store} />
@@ -179,7 +168,7 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      
+
       <Footer />
     </div>
   );

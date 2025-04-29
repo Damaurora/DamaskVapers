@@ -7,7 +7,7 @@ import { Settings as SettingsIcon, BarChart2, Package, UploadCloud, Download, Lo
 import { useSyncGoogleSheets, useSettings, useUpdateSettings } from "@/hooks/use-settings";
 import { useAuth } from "@/hooks/use-auth";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,7 +33,14 @@ export default function SettingsPage() {
   const updateSettings = useUpdateSettings();
   const syncGoogleSheets = useSyncGoogleSheets();
   const [isSyncing, setIsSyncing] = useState(false);
-  
+  const [stores, setStores] = useState([
+    { id: 1, name: "Магазин 1", address: "Адрес 1", phone: "Телефон 1", image: "/images/store1.jpg" },
+    { id: 2, name: "Магазин 2", address: "Адрес 2", phone: "Телефон 2", image: "/images/store2.jpg" }
+  ]);
+  const [showAddStoreModal, setShowAddStoreModal] = useState(false);
+  const defaultStoreImage = "/images/default_store.jpg";
+
+
   // Инициализация формы
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,7 +52,7 @@ export default function SettingsPage() {
       googleApiKey: "",
     },
   });
-  
+
   // Обновление формы при загрузке данных
   useEffect(() => {
     if (settings) {
@@ -58,7 +65,7 @@ export default function SettingsPage() {
       });
     }
   }, [settings, form]);
-  
+
   // Обработка отправки формы
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -69,7 +76,7 @@ export default function SettingsPage() {
         googleSheetsUrl: values.googleSheetsUrl,
         googleApiKey: values.googleApiKey,
       });
-      
+
       toast({
         title: "Настройки сохранены",
         description: "Изменения успешно применены",
@@ -82,7 +89,7 @@ export default function SettingsPage() {
       });
     }
   };
-  
+
   // Обработка синхронизации с Google Таблицами
   const handleSyncGoogleSheets = async () => {
     if (!form.getValues().googleSheetsUrl || !form.getValues().googleApiKey) {
@@ -93,7 +100,7 @@ export default function SettingsPage() {
       });
       return;
     }
-    
+
     setIsSyncing(true);
     try {
       await syncGoogleSheets.mutateAsync();
@@ -111,12 +118,16 @@ export default function SettingsPage() {
       setIsSyncing(false);
     }
   };
-  
+
+  const handleDeleteStore = (storeId: number) => {
+    setStores(stores.filter(store => store.id !== storeId));
+  };
+
   // Обработка выхода из системы
   const handleLogout = () => {
     logoutMutation.mutate();
   };
-  
+
   // Отображение загрузки
   if (isLoading) {
     return (
@@ -125,7 +136,7 @@ export default function SettingsPage() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-secondary">
       <div className="flex">
@@ -137,7 +148,7 @@ export default function SettingsPage() {
               Панель администратора
             </h1>
           </div>
-          
+
           <nav className="flex-1 p-4">
             <div className="space-y-1">
               <Link href="/admin">
@@ -160,7 +171,7 @@ export default function SettingsPage() {
               </Link>
             </div>
           </nav>
-          
+
           <div className="p-4 border-t border-gray-800">
             <div className="flex items-center justify-between">
               <div className="flex items-center">
@@ -184,7 +195,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Мобильный хедер */}
         <div className="md:hidden bg-[#1E1E1E] border-b border-gray-800 w-full fixed top-0 z-10">
           <div className="flex items-center justify-between p-4">
@@ -194,7 +205,7 @@ export default function SettingsPage() {
                 Панель администратора
               </h1>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <Button 
                 variant="ghost" 
@@ -211,7 +222,7 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-        
+
         {/* Основное содержимое */}
         <div className="flex-1 md:ml-64">
           <div className="container mx-auto px-4 py-8 md:py-6 mt-[61px] md:mt-0">
@@ -220,7 +231,7 @@ export default function SettingsPage() {
                 <h1 className="text-2xl font-bold font-montserrat">Настройки</h1>
                 <p className="text-gray-400">Управление настройками магазина</p>
               </div>
-              
+
               <Button 
                 onClick={form.handleSubmit(onSubmit)}
                 className="bg-primary hover:bg-primary/90 text-white"
@@ -236,12 +247,12 @@ export default function SettingsPage() {
                 )}
               </Button>
             </div>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Основная форма настроек */}
               <div className="lg:col-span-2 space-y-6">
                 <InventorySummary />
-                
+
                 <Form {...form}>
                   <form>
                     <Card className="bg-[#1E1E1E] border-gray-800 text-white">
@@ -269,7 +280,7 @@ export default function SettingsPage() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={form.control}
                           name="shopDescription"
@@ -290,7 +301,7 @@ export default function SettingsPage() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={form.control}
                           name="logoUrl"
@@ -313,7 +324,7 @@ export default function SettingsPage() {
                         />
                       </CardContent>
                     </Card>
-                    
+
                     <Card className="bg-[#1E1E1E] border-gray-800 text-white mt-6">
                       <CardHeader>
                         <CardTitle>Интеграция с Google Таблицами</CardTitle>
@@ -342,7 +353,7 @@ export default function SettingsPage() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={form.control}
                           name="googleApiKey"
@@ -364,14 +375,14 @@ export default function SettingsPage() {
                             </FormItem>
                           )}
                         />
-                        
+
                         {settings?.lastSyncTime && (
                           <div className="flex items-center mt-2 text-sm text-gray-400">
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Последняя синхронизация: {new Date(settings.lastSyncTime).toLocaleString()}
                           </div>
                         )}
-                        
+
                         <div className="flex flex-col space-y-2">
                           <p className="text-sm text-amber-400">
                             <strong>Формат таблицы Google Sheets:</strong>
@@ -382,7 +393,7 @@ export default function SettingsPage() {
                             <li>Обязательно откройте доступ к таблице по ссылке (для просмотра)</li>
                           </ul>
                         </div>
-                        
+
                         <div className="flex items-center space-x-4 pt-4">
                           <Button
                             type="button"
@@ -403,7 +414,7 @@ export default function SettingsPage() {
                               </>
                             )}
                           </Button>
-                          
+
                           <a 
                             href="/client/src/assets/google-sheets-template.csv" 
                             download="google-sheets-template.csv"
@@ -417,10 +428,59 @@ export default function SettingsPage() {
                         </div>
                       </CardContent>
                     </Card>
+
+                    <Card className="bg-[#1E1E1E] border-gray-800 text-white mt-6">
+                      <CardHeader>
+                        <CardTitle>Управление магазинами</CardTitle>
+                        <CardDescription className="text-gray-400">
+                          Добавление и редактирование магазинов
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {stores?.map(store => (
+                            <div key={store.id} className="p-4 border border-gray-800 rounded-lg">
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-medium">{store.name}</h3>
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm"
+                                  onClick={() => handleDeleteStore(store.id)}
+                                >
+                                  Удалить
+                                </Button>
+                              </div>
+                              <div className="grid gap-4">
+                                <div className="flex items-center gap-4">
+                                  <img 
+                                    src={store.image || defaultStoreImage} 
+                                    alt={store.name}
+                                    className="w-24 h-24 object-cover rounded"
+                                  />
+                                  <div>
+                                    <p className="text-sm text-gray-400">Адрес:</p>
+                                    <p>{store.address}</p>
+                                    <p className="text-sm text-gray-400 mt-2">Телефон:</p>
+                                    <p>{store.phone}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+
+                          <Button
+                            onClick={() => setShowAddStoreModal(true)}
+                            className="w-full bg-primary hover:bg-primary/90"
+                          >
+                            Добавить магазин
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
                   </form>
                 </Form>
               </div>
-              
+
               {/* Боковые карточки с инструкциями */}
               <div className="space-y-6">
                 <Card className="bg-[#1E1E1E] border-gray-800 text-white">
@@ -436,7 +496,7 @@ export default function SettingsPage() {
                         <h3 className="font-medium text-white">1. Создайте Google Таблицу</h3>
                         <p className="text-gray-400 mt-1">Создайте новую таблицу или используйте скачанный шаблон</p>
                       </div>
-                      
+
                       <div>
                         <h3 className="font-medium text-white">2. Настройте структуру</h3>
                         <p className="text-gray-400 mt-1">
@@ -448,14 +508,14 @@ export default function SettingsPage() {
                           </ul>
                         </p>
                       </div>
-                      
+
                       <div>
                         <h3 className="font-medium text-white">3. Получите API ключ</h3>
                         <p className="text-gray-400 mt-1">
                           Создайте ключ API в <a href="https://console.cloud.google.com/" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Google Cloud Console</a>
                         </p>
                       </div>
-                      
+
                       <div>
                         <h3 className="font-medium text-white">4. Настройте доступ</h3>
                         <p className="text-gray-400 mt-1">Откройте доступ к таблице для всех, у кого есть ссылка (режим "Просмотр")</p>
@@ -463,7 +523,7 @@ export default function SettingsPage() {
                     </div>
                   </CardContent>
                 </Card>
-                
+
                 <Card className="bg-gradient-to-br from-gray-800 to-[#1E1E1E] border-gray-800 text-white">
                   <CardHeader>
                     <CardTitle>Помощь</CardTitle>
