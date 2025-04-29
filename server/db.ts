@@ -1,19 +1,8 @@
 
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from 'ws';
-import * as schema from '@shared/schema';
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import * as schema from "@shared/schema";
 
-neonConfig.webSocketConstructor = ws;
+const sqlite = new Database("sqlite.db");
 
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL не установлен. Проверьте настройки окружения.');
-}
-
-// Настройка пула соединений
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production'
-});
-
-export const db = drizzle(pool, { schema });
+export const db = drizzle(sqlite, { schema });
