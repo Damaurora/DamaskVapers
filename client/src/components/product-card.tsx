@@ -51,7 +51,9 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
       
       <div className="p-4">
         <h3 className="font-montserrat font-medium text-white text-lg mb-2">{name}</h3>
-        <p className={`text-gray-400 text-sm ${featured ? 'line-clamp-2 mb-0' : 'mb-4'}`}>{description}</p>
+        <p className={`text-gray-400 text-sm ${featured ? 'line-clamp-2 mb-0' : 'mb-4'}`}>
+          {description?.length > 75 ? `${description.substring(0, 75)}...` : description}
+        </p>
         
         {!featured && (
           <>
