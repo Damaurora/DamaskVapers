@@ -38,7 +38,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = await registerRoutes(app);
+  try {
+    const isConnected = await checkConnection();
+    if (!isConnected) {
+      throw new Error('Could not connect to database');
+    }
+    const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
