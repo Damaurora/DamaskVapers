@@ -88,7 +88,7 @@ export function StoreInventoryInput({
               type="number"
               min="0"
               step="1"
-              value={inventory[store.id] || 0}
+              value={inventory[store.id] || ''}
               onChange={(e) => handleQuantityChange(store.id, e.target.value)}
               className="bg-secondary border-gray-700 text-white"
             />

@@ -1,53 +1,105 @@
+
+import { useState } from 'react';
 import { Store } from '@shared/schema';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Edit2, Save, X } from 'lucide-react';
 
 interface StoreLocationCardProps {
   store: Store;
+  onEdit?: (store: Store) => void;
 }
 
-export default function StoreLocationCard({ store }: StoreLocationCardProps) {
-  const { name, address, image, workHoursWeekdays, workHoursWeekend, phone } = store;
-  
-  const defaultImage = "https://images.unsplash.com/photo-1556740738-b6a63e27c4df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&h=300&q=80";
-  
+export default function StoreLocationCard({ store, onEdit }: StoreLocationCardProps) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedStore, setEditedStore] = useState(store);
+
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`/api/stores/${store.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(editedStore),
+      });
+
+      if (response.ok) {
+        setIsEditing(false);
+        if (onEdit) {
+          onEdit(editedStore);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating store:', error);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Card className="bg-white/5 backdrop-blur-sm border-gray-800">
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            <Input
+              value={editedStore.name}
+              onChange={(e) => setEditedStore({ ...editedStore, name: e.target.value })}
+              placeholder="Название магазина"
+              className="bg-secondary border-gray-700"
+            />
+            <Input
+              value={editedStore.address}
+              onChange={(e) => setEditedStore({ ...editedStore, address: e.target.value })}
+              placeholder="Адрес"
+              className="bg-secondary border-gray-700"
+            />
+            <Input
+              value={editedStore.phone}
+              onChange={(e) => setEditedStore({ ...editedStore, phone: e.target.value })}
+              placeholder="Телефон"
+              className="bg-secondary border-gray-700"
+            />
+            <div className="flex justify-end space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsEditing(false)}
+              >
+                <X className="h-4 w-4 mr-1" />
+                Отмена
+              </Button>
+              <Button 
+                size="sm"
+                onClick={handleSave}
+              >
+                <Save className="h-4 w-4 mr-1" />
+                Сохранить
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
-    <div className="bg-secondary p-6 rounded-lg">
-      <h3 className="text-xl font-semibold font-montserrat mb-4 flex items-center">
-        <svg className="text-primary w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-          <circle cx="12" cy="10" r="3"></circle>
-        </svg>
-        {address}
-      </h3>
-      
-      <img 
-        src={image || defaultImage} 
-        alt={`Магазин на ${address}`} 
-        className="w-full h-48 object-cover rounded-md mb-4"
-      />
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-        <div className="flex items-center">
-          <svg className="text-primary w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          <span className="text-gray-300">Пн-Пт: {workHoursWeekdays}</span>
+    <Card className="bg-white/5 backdrop-blur-sm border-gray-800">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-xl font-medium">{store.name}</h3>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsEditing(true)}
+          >
+            <Edit2 className="h-4 w-4" />
+          </Button>
         </div>
-        <div className="flex items-center">
-          <svg className="text-primary w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <polyline points="12 6 12 12 16 14"></polyline>
-          </svg>
-          <span className="text-gray-300">Сб-Вс: {workHoursWeekend}</span>
+        <div className="space-y-2 text-gray-400">
+          <p>{store.address}</p>
+          <p>{store.phone}</p>
         </div>
-      </div>
-      
-      <div className="flex items-center">
-        <svg className="text-primary w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-        </svg>
-        <a href={`tel:${phone}`} className="text-gray-300 hover:text-white">{phone}</a>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -163,7 +163,11 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {stores?.map(store => (
-              <StoreLocationCard key={store.id} store={store} />
+              <StoreLocationCard 
+                key={store.id} 
+                store={store}
+                onEdit={() => handleEditStore(store)}
+              />
             ))}
           </div>
         </div>
