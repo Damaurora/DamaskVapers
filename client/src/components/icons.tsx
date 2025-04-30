@@ -22,10 +22,10 @@ export const logoVariants = cva(
   }
 );
 
-export const LogoIcon: React.FC<IconProps> = ({ className, size }) => {
+export const LogoIcon: React.FC<IconProps> = ({ className }) => {
   return (
     <svg 
-      className={cn(logoVariants({ size }), className)}
+      className={cn("w-10 h-10 transition-transform hover:scale-105", className)}
       viewBox="0 0 512 512" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
