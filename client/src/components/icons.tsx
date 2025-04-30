@@ -4,7 +4,27 @@ interface IconProps {
   className?: string;
 }
 
-export const LogoIcon: React.FC<IconProps> = ({ className }) => {
+const logoVariants = cva(
+  "transition-transform hover:scale-105",
+  {
+    variants: {
+      size: {
+        default: "w-10 h-10",
+        sm: "w-8 h-8",
+        lg: "w-12 h-12"
+      }
+    },
+    defaultVariants: {
+      size: "default"
+    }
+  }
+);
+
+interface LogoIconProps extends IconProps {
+  size?: "default" | "sm" | "lg";
+}
+
+export const LogoIcon: React.FC<LogoIconProps> = ({ className, size }) => {
   return (
     <svg 
       className={className} 
