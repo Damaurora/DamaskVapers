@@ -1,9 +1,8 @@
-
 import React from 'react';
-import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import { cn } from "@/lib/utils";
 
-export const logoVariants = cva(
+const logoVariants = cva(
   "transition-transform hover:scale-105",
   {
     variants: {
@@ -48,7 +47,6 @@ export const LogoIcon: React.FC<IconProps> = ({ className, size }) => {
   );
 };
 
-// [Остальные компоненты иконок остаются без изменений]
 export const PodIcon: React.FC<IconProps> = ({ className }) => {
   return (
     <svg 
