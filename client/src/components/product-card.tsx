@@ -9,6 +9,8 @@ interface ProductCardProps {
   featured?: boolean;
 }
 
+import { Link } from 'wouter';
+
 export default function ProductCard({ product, featured = false }: ProductCardProps) {
   const { id, name, description, image, status, quantity } = product;
   
@@ -38,7 +40,8 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
   };
   
   return (
-    <div className={`product-card bg-[#1E1E1E] rounded-lg overflow-hidden relative ${featured ? 'flex-shrink-0 w-64' : ''}`}>
+    <Link href={`/product/${id}`}>
+      <div className={`product-card bg-[#1E1E1E] rounded-lg overflow-hidden relative ${featured ? 'flex-shrink-0 w-64' : ''} cursor-pointer`}>
       <StatusBadge status={status} quantity={quantity} className="status-badge z-10">
         {getStatusText(status)}
       </StatusBadge>
@@ -74,5 +77,6 @@ export default function ProductCard({ product, featured = false }: ProductCardPr
         )}
       </div>
     </div>
+    </Link>
   );
 }
