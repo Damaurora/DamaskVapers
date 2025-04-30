@@ -1,14 +1,32 @@
+
 import React from 'react';
 import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 
-interface IconProps {
+export const logoVariants = cva(
+  "transition-transform hover:scale-105",
+  {
+    variants: {
+      size: {
+        default: "w-10 h-10",
+        sm: "w-8 h-8",
+        lg: "w-12 h-12"
+      }
+    },
+    defaultVariants: {
+      size: "default"
+    }
+  }
+);
+
+interface IconProps extends VariantProps<typeof logoVariants> {
   className?: string;
 }
 
-export const LogoIcon: React.FC<IconProps> = ({ className }) => {
+export const LogoIcon: React.FC<IconProps> = ({ className, size }) => {
   return (
     <svg 
-      className={cn("w-10 h-10 transition-transform hover:scale-105", className)}
+      className={cn(logoVariants({ size }), className)}
       viewBox="0 0 512 512" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
@@ -30,6 +48,7 @@ export const LogoIcon: React.FC<IconProps> = ({ className }) => {
   );
 };
 
+// [Остальные компоненты иконок остаются без изменений]
 export const PodIcon: React.FC<IconProps> = ({ className }) => {
   return (
     <svg 
