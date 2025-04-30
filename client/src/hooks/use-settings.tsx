@@ -5,10 +5,16 @@ import { Settings, InsertSettings } from '@shared/schema';
 export function useSettings() {
   const { data, isLoading, error } = useQuery<Settings>({
     queryKey: ['/api/settings'],
+    retry: 3,
+    retryDelay: 1000,
   });
+
+  console.log('Settings data:', data);
+  console.log('Settings error:', error);
 
   return { data, isLoading, error };
 }
+
 
 export function useUpdateSettings() {
   const queryClient = useQueryClient();
