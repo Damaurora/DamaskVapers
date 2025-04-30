@@ -1,31 +1,14 @@
 import React from 'react';
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
-const logoVariants = cva(
-  "transition-transform hover:scale-105",
-  {
-    variants: {
-      size: {
-        default: "w-10 h-10",
-        sm: "w-8 h-8",
-        lg: "w-12 h-12"
-      }
-    },
-    defaultVariants: {
-      size: "default"
-    }
-  }
-);
-
-interface IconProps extends VariantProps<typeof logoVariants> {
+interface IconProps {
   className?: string;
 }
 
-export const LogoIcon: React.FC<IconProps> = ({ className, size }) => {
+export const LogoIcon: React.FC<IconProps> = ({ className }) => {
   return (
     <svg 
-      className={cn(logoVariants({ size }), className)}
+      className={cn("w-10 h-10 transition-transform hover:scale-105", className)}
       viewBox="0 0 512 512" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
